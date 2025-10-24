@@ -17,15 +17,20 @@
 - [x] Initialize monorepo structure
 - [x] Set up FastAPI backend
 - [x] Configure development environment
-- [x] Create Docker setup
+- [x] Install FFmpeg dependency
+- [x] Create all router files (sources, videos, generation)
+- [x] Set up package.json for frontend and Remotion
+- [x] Configure Python virtual environment
+- [x] Install all dependencies (latest versions)
 
 #### Milestone 1.2: Source Processing
 
-- [ ] Implement document upload endpoint
+- [x] Implement document upload endpoint (basic)
 - [ ] Build PDF text extraction
 - [ ] Build DOCX text extraction
 - [ ] Build URL/web scraping
 - [ ] Implement source storage system
+- [ ] Add database integration
 
 #### Milestone 1.3: Gemini Integration
 
@@ -46,7 +51,7 @@
 
 #### Milestone 2.1: React Frontend
 
-- [ ] Set up Vite + React + TypeScript
+- [x] Set up Vite + React + TypeScript
 - [ ] Create source upload UI
 - [ ] Build video configuration form
 - [ ] Implement progress tracking
@@ -137,6 +142,14 @@
 **WebSocket** for real-time progress updates
 **Async processing** for long-running tasks
 
+### Latest Dependencies (Oct 24, 2025)
+
+- **Python**: Latest versions without pinning (fastapi, uvicorn, google-generativeai 0.8.3)
+- **React**: 18.3.1
+- **Remotion**: 4.0.246
+- **Vite**: 5.4.10
+- **TypeScript**: 5.6.3
+
 ## Success Criteria
 
 ### MVP Success
@@ -158,12 +171,13 @@
 
 ## Risk Management
 
-| Risk                      | Impact | Mitigation                         |
-| ------------------------- | ------ | ---------------------------------- |
-| Gemini API rate limits    | High   | Implement queue, caching, retries  |
-| Rendering time too long   | Medium | Use cloud rendering, optimize code |
-| Asset storage costs       | Medium | Implement cleanup, use compression |
-| Complex UI learning curve | Low    | Add tutorials, tooltips, examples  |
+| Risk                          | Impact | Mitigation                                |
+| ----------------------------- | ------ | ----------------------------------------- |
+| Gemini API rate limits        | High   | Implement queue, caching, retries         |
+| Rendering time too long       | Medium | Use cloud rendering, optimize code        |
+| Asset storage costs           | Medium | Implement cleanup, use compression        |
+| Complex UI learning curve     | Low    | Add tutorials, tooltips, examples         |
+| Windows-specific setup issues | Medium | Provide PowerShell scripts, detailed docs |
 
 ## Resource Requirements
 
@@ -174,7 +188,7 @@
 
 ## Next Steps
 
-1. Complete backend source processing (Milestone 1.2)
-2. Implement Gemini integration (Milestone 1.3)
-3. Build basic frontend UI (Milestone 2.1)
-4. Create first Remotion video template (Milestone 2.2)
+1. **Immediate**: Create service files for document processing
+2. **Today**: Implement PDF/DOCX extraction
+3. **This Week**: Gemini API integration for script analysis
+4. **Next Week**: Frontend UI and Remotion components

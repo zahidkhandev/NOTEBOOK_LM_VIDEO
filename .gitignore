@@ -9,6 +9,9 @@ ENV/
 env/
 *.egg-info/
 
+# Data folder - backend
+backend/data
+
 # Node
 node_modules/
 dist/
