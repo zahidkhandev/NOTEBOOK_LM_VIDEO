@@ -1,0 +1,176 @@
+/**
+ * Main CSS entry point - Tailwind CSS
+ */
+
+/* Import global styles FIRST */
+@import "./styles/globals.css";
+@import "./styles/components.css";
+
+/* Then Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply font-sans antialiased bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  @apply min-h-screen;
+}
+
+/* Typography */
+h1 {
+  @apply text-3xl md:text-4xl font-bold;
+}
+
+h2 {
+  @apply text-2xl md:text-3xl font-bold;
+}
+
+h3 {
+  @apply text-xl md:text-2xl font-bold;
+}
+
+h4 {
+  @apply text-lg md:text-xl font-semibold;
+}
+
+h5 {
+  @apply text-base md:text-lg font-semibold;
+}
+
+h6 {
+  @apply text-sm md:text-base font-semibold;
+}
+
+p {
+  @apply text-base leading-relaxed;
+}
+
+small {
+  @apply text-sm;
+}
+
+/* Links */
+a {
+  @apply text-blue-600 dark:text-blue-400 hover:underline;
+}
+
+/* Code blocks */
+code {
+  @apply bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono text-sm;
+}
+
+pre {
+  @apply bg-gray-900 dark:bg-slate-950 text-white p-4 rounded-lg overflow-x-auto font-mono text-sm;
+}
+
+/* Lists */
+ul,
+ol {
+  @apply ml-4;
+}
+
+ul {
+  @apply list-disc;
+}
+
+ol {
+  @apply list-decimal;
+}
+
+li {
+  @apply mb-2;
+}
+
+/* Blockquotes */
+blockquote {
+  @apply border-l-4 border-blue-600 pl-4 py-2 italic text-gray-700 dark:text-gray-300;
+}
+
+/* Horizontal rule */
+hr {
+  @apply border-gray-200 dark:border-slate-700 my-4;
+}
+
+/* Tables */
+table {
+  @apply w-full border-collapse;
+}
+
+th {
+  @apply bg-gray-100 dark:bg-slate-700 px-4 py-2 text-left font-semibold border border-gray-200 dark:border-slate-600;
+}
+
+td {
+  @apply px-4 py-2 border border-gray-200 dark:border-slate-600;
+}
+
+/* Form elements - additional styling */
+input,
+select,
+textarea {
+  @apply w-full;
+}
+
+button {
+  @apply cursor-pointer;
+}
+
+button:disabled {
+  @apply cursor-not-allowed;
+}
+
+/* Loading indicator */
+.loader {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #2563eb;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fade transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease-out;
+}

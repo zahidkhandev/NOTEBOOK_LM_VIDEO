@@ -1,0 +1,120 @@
+/**
+ * App-specific styles
+ */
+
+.app {
+  @apply min-h-screen bg-gray-50 dark:bg-slate-900;
+}
+
+.header {
+  @apply sticky top-0 z-40 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm;
+}
+
+/* Main content area */
+main {
+  @apply flex-1 overflow-y-auto;
+}
+
+/* Responsive padding */
+@media (max-width: 640px) {
+  main {
+    padding: 1rem 0.5rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  main {
+    padding: 2rem 1rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  main {
+    padding: 2rem;
+  }
+}
+
+/* Page transitions */
+.page-enter {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.page-exit {
+  animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Utility classes - NO @apply to avoid circular deps */
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-auto {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-auto {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-auto {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid-auto {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.my-auto {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Focus management */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.dark :focus-visible {
+  outline-color: #60a5fa;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none;
+  }
+}

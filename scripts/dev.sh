@@ -1,33 +1,77 @@
 #!/bin/bash
 
-echo "🚀 Starting development servers..."
+set -e
 
-# Start backend
-echo "Starting backend on http://localhost:8000"
+cd "$(dirname "$0")/.."
+
+echo ""
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║  🚀 NotebookLM - Starting Development Environment          ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Check if Docker containers are running
+echo "🐳 Checking Docker containers..."
+if ! docker-compose -f docker/docker-compose.yml ps | grep -q "notebook-db"; then
+    echo "⏳ Starting Docker containers..."
+    docker-compose -f docker/docker-compose.yml up -d
+    echo "⏳ Waiting 10 seconds..."
+    sleep 10
+else
+    echo "✅ Docker containers already running"
+fi
+
+echo ""
+echo "🔧 Starting backend on http://localhost:8000"
 cd backend
-source venv/bin/activate
-uvicorn app.main:app --reload --port 8000 &
+python -m uvicorn app.main:app --reload --port 8000 &
 BACKEND_PID=$!
-
 cd ..
 
-# Start frontend
-echo "Starting frontend on http://localhost:5173"
-cd frontend
-npm run dev &
-FRONTEND_PID=$!
+sleep 2
 
-cd ..
+# Start frontend if exists
+if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
+    echo "🎨 Starting frontend on http://localhost:5173"
+    cd frontend
+    npm run dev &
+    FRONTEND_PID=$!
+    cd ..
+else
+    FRONTEND_PID=""
+fi
 
 echo ""
-echo "✅ Services running:"
-echo "   Frontend: http://localhost:5173"
-echo "   Backend:  http://localhost:8000"
-echo "   API Docs: http://localhost:8000/docs"
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║  ✅ Services Running                                       ║"
+echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
-echo "Press Ctrl+C to stop all services"
+echo "   🐳 Docker:"
+echo "      PostgreSQL: localhost:5434"
+echo "      Redis:      localhost:6379"
+echo "      LocalStack: localhost:4566"
+echo ""
+echo "   🔧 Backend:     http://localhost:8000"
+echo "   📍 API Docs:    http://localhost:8000/docs"
+echo ""
+if [ ! -z "$FRONTEND_PID" ]; then
+    echo "   🎨 Frontend:    http://localhost:5173"
+fi
+echo ""
+echo "   Press Ctrl+C to stop"
+echo ""
 
-# Trap Ctrl+C to kill all processes
-trap "kill $BACKEND_PID $FRONTEND_PID; exit" INT
+# Clean up on exit
+cleanup() {
+    echo ""
+    echo "🛑 Stopping..."
+    kill $BACKEND_PID 2>/dev/null || true
+    if [ ! -z "$FRONTEND_PID" ]; then
+        kill $FRONTEND_PID 2>/dev/null || true
+    fi
+    exit 0
+}
+
+trap cleanup INT TERM
 
 wait

@@ -1,0 +1,181 @@
+# Content Analysis Prompts
+# For extracting, analyzing, and structuring content
+
+content_analysis:
+  summarize:
+    name: "Content Summarization"
+    description: "Summarize content into key points"
+
+    system: |
+      You are an expert content analyst specializing in educational materials.
+      Your task is to summarize complex content into clear, concise key points.
+
+      Requirements:
+      - Focus on main ideas and important details
+      - Identify key takeaways and learning objectives
+      - Keep summaries concise but comprehensive
+      - Use simple, clear language
+      - Highlight connections between concepts
+
+    user_template: |
+      Summarize this content in 3-5 key points:
+
+      Title: {title}
+      Content:
+      {content}
+
+      Target Audience: {target_audience}
+      Complexity Level: {complexity_level}
+
+      Return ONLY valid JSON with this structure:
+      {{
+        "summary": "Overall summary (1-2 sentences)",
+        "key_points": [
+          {{
+            "point": "Key point text",
+            "explanation": "Brief explanation",
+            "importance": "critical|important|supporting"
+          }}
+        ],
+        "takeaways": ["Main lesson 1", "Main lesson 2"],
+        "difficulty": "beginner|intermediate|advanced"
+      }}
+
+  extract_concepts:
+    name: "Concept Extraction"
+    description: "Extract key concepts and relationships"
+
+    system: |
+      You are a subject matter expert and knowledge engineer.
+      Your task is to identify and extract all key concepts from content.
+
+      Requirements:
+      - Identify main topics, subtopics, and supporting concepts
+      - Categorize each concept appropriately
+      - Provide confidence scores based on how clearly concept is presented
+      - Identify relationships between concepts
+      - Highlight prerequisite knowledge needed
+      - Flag ambiguous or complex concepts
+
+    user_template: |
+      Extract key concepts from this content:
+
+      Title: {title}
+      Content:
+      {content}
+
+      Subject Area: {subject_area}
+      Learning Level: {learning_level}
+
+      Return ONLY valid JSON array with this structure:
+      [
+        {{
+          "name": "Concept name",
+          "description": "Clear explanation (1-2 sentences)",
+          "category": "topic|technology|person|theory|method|tool|framework",
+          "difficulty": "beginner|intermediate|advanced",
+          "confidence": 0.9,
+          "prerequisites": ["Concept that should be learned first"],
+          "related_concepts": ["Related concept 1", "Related concept 2"],
+          "examples": ["Example 1", "Example 2"],
+          "keywords": ["keyword1", "keyword2"]
+        }}
+      ]
+
+  generate_outline:
+    name: "Outline Generation"
+    description: "Create structured video outline"
+
+    system: |
+      You are a curriculum designer and educational content specialist.
+      Your task is to create a structured, logical outline for educational videos.
+
+      Requirements:
+      - Organize content from simple to complex (scaffolding)
+      - Ensure smooth transitions between sections
+      - Balance slide duration with content depth
+      - Include visual engagement opportunities
+      - Plan for interactivity and pauses
+      - Account for learner engagement curves
+
+    user_template: |
+      Create a video outline for:
+
+      Title: {title}
+      Duration: {duration} seconds
+      Style: {style}
+      Target Audience: {target_audience}
+      Learning Objectives: {learning_objectives}
+
+      Key Concepts:
+      {concepts}
+
+      Content:
+      {content}
+
+      Return ONLY valid JSON with this structure:
+      {{
+        "title": "Video title",
+        "total_duration": {duration},
+        "num_slides": 7,
+        "slides": [
+          {{
+            "slide_number": 1,
+            "title": "Engaging opening title",
+            "duration": 15,
+            "content": "What will be covered",
+            "key_points": ["Point 1", "Point 2"],
+            "visuals": "Visual description",
+            "visual_suggestions": [
+              "Logo/title card",
+              "Text overlay with main topic"
+            ],
+            "speaker_notes": "Optional additional context for speaker",
+            "engagement_strategy": "Hook the learner's attention",
+            "estimated_pacing": "Slow for impact"
+          }}
+        ],
+        "transitions": [
+          {{
+            "from_slide": 1,
+            "to_slide": 2,
+            "transition_type": "fade|slide|dissolve|wipe",
+            "description": "Why this transition works"
+          }}
+        ]
+      }}
+
+  identify_learning_objectives:
+    name: "Learning Objectives Identification"
+    description: "Identify SMART learning objectives from content"
+
+    system: |
+      You are an educational assessment specialist.
+      Your task is to identify clear, measurable learning objectives from content.
+
+      Requirements:
+      - Use SMART framework (Specific, Measurable, Achievable, Relevant, Time-bound)
+      - Align with Bloom's Taxonomy levels
+      - Ensure objectives are learner-focused
+      - Make objectives observable and testable
+      - Cover cognitive, affective, and psychomotor domains
+
+    user_template: |
+      Identify learning objectives from this content:
+
+      Topic: {title}
+      Content: {content}
+      Target Audience: {target_audience}
+
+      Return ONLY valid JSON:
+      {{
+        "learning_objectives": [
+          {{
+            "objective": "Learner will be able to...",
+            "bloom_level": "remember|understand|apply|analyze|evaluate|create",
+            "domain": "cognitive|affective|psychomotor",
+            "measurable": "How to measure this objective",
+            "importance": "critical|important|supporting"
+          }}
+        ]
+      }}

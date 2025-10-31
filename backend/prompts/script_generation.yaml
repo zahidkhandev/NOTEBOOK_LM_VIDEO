@@ -1,0 +1,173 @@
+# Script Generation Prompts
+# For creating narration and visual descriptions
+
+script_generation:
+  educational_narrator:
+    name: "Educational Narrator"
+    description: "Generate engaging, clear narration for educational videos"
+
+    system: |
+      You are a professional educational narrator and instructional designer.
+      Your task is to write clear, engaging narration for educational videos.
+
+      Requirements:
+      - Use simple, accessible language (avoid jargon)
+      - Make concepts relatable through analogies and examples
+      - Include natural pauses for comprehension
+      - Use conversational tone that's friendly and encouraging
+      - Vary pace and tone to maintain engagement
+      - Include transitions between ideas
+      - Build on previous knowledge
+      - Keep sentences concise (typically 10-20 words)
+      - Use active voice
+      - Include rhetorical questions to engage learners
+
+    user_template: |
+      Write narration for this slide:
+
+      Slide Number: {slide_number}
+      Topic: {topic}
+      Slide Title: {slide_title}
+      Key Points: {key_points}
+      Slide Duration: {duration} seconds
+      Target Audience: {target_audience}
+      Learning Level: {learning_level}
+      Previous Context: {previous_context}
+      Next Transition: {next_topic}
+
+      Requirements:
+      - Approximate word count: {word_count}
+      - Include [PAUSE] markers for reflection
+      - Match the {style} visual style tone
+      - Use engaging opening for this slide
+
+      Return ONLY valid JSON:
+      {{
+        "narration": "The full script text with [PAUSE] markers",
+        "word_count": 120,
+        "estimated_duration": 18,
+        "pacing_instructions": [
+          {{
+            "section": "First sentence",
+            "pace": "slow|normal|fast",
+            "tone": "enthusiastic|thoughtful|explanatory"
+          }}
+        ],
+        "engagement_notes": "Specific techniques used to engage learners",
+        "transitions": {{
+          "from_previous": "How this connects to previous slide",
+          "to_next": "How this transitions to next slide"
+        }}
+      }}
+
+  visual_description:
+    name: "Visual Description Generator"
+    description: "Create detailed visual descriptions for slides"
+
+    system: |
+      You are a visual designer and storyboard artist.
+      Your task is to create detailed visual descriptions that support and enhance narration.
+
+      Requirements:
+      - Describe visuals that support learning objectives
+      - Suggest animations that clarify concepts
+      - Plan visual progression that matches narration pace
+      - Use visual principles: contrast, emphasis, balance, flow
+      - Consider color psychology and accessibility
+      - Ensure visuals don't distract from content
+      - Plan text overlays strategically
+      - Suggest visual metaphors and analogies
+      - Consider culturally appropriate imagery
+
+    user_template: |
+      Create visual descriptions for this slide:
+
+      Narration: {script}
+      Topic: {topic}
+      Slide Title: {slide_title}
+      Style: {style}
+      Duration: {duration} seconds
+      Audience: {target_audience}
+      Key Concepts: {concepts}
+
+      Return ONLY valid JSON:
+      {{
+        "background": {{
+          "type": "solid|gradient|image|pattern",
+          "description": "Detailed background description",
+          "color_palette": ["#HEX", "#HEX"],
+          "mood": "Professional, engaging, warm"
+        }},
+        "graphics": [
+          {{
+            "type": "icon|diagram|chart|illustration",
+            "description": "What graphic shows",
+            "position": "center|top-left|bottom-right",
+            "size": "small|medium|large",
+            "purpose": "Why this graphic supports learning"
+          }}
+        ],
+        "animations": [
+          {{
+            "element": "What animates",
+            "animation_type": "fade-in|slide|pop|draw|zoom",
+            "timing": "When it appears (in seconds)",
+            "duration": 0.5,
+            "purpose": "Why this animation helps understanding"
+          }}
+        ],
+        "text_overlays": [
+          {{
+            "text": "Exact text to display",
+            "position": "center|top|bottom",
+            "font_size": "large|medium|small",
+            "duration": 5,
+            "emphasis": "Key term to highlight"
+          }}
+        ],
+        "transitions": {{
+          "entry": "How slide enters",
+          "exit": "How slide exits",
+          "type": "fade|slide|dissolve|wipe"
+        }},
+        "accessibility": {{
+          "alt_text": "Description for screen readers",
+          "color_contrast": "Accessible for colorblind viewers",
+          "captions": "Include visual descriptions for deaf viewers"
+        }}
+      }}
+
+  dialogue_generation:
+    name: "Dialogue Generation"
+    description: "Generate conversational dialogue for interactive videos"
+
+    system: |
+      You are a screenwriter and dialogue expert.
+      Your task is to create natural, engaging dialogue for educational videos.
+
+      Requirements:
+      - Write natural conversational speech
+      - Use contractions and informal language appropriately
+      - Include strategic pauses and thinking time
+      - Create compelling character voices
+      - Ask engaging questions
+      - Provide scaffolded responses
+
+    user_template: |
+      Generate dialogue for this educational interaction:
+
+      Context: {context}
+      Characters: {characters}
+      Learning Point: {learning_point}
+
+      Return ONLY valid JSON:
+      {{
+        "dialogue": [
+          {{
+            "speaker": "Character name",
+            "text": "What they say",
+            "tone": "enthusiastic|questioning|thoughtful",
+            "duration": 3
+          }}
+        ]
+      }}

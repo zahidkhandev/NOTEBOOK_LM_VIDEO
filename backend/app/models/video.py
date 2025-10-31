@@ -1,61 +1,99 @@
-import enum
+"""
+Video model for database storage.
+
+Represents generated videos with metadata, embeddings, and relationships.
+"""
+
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Text, DateTime, Float, func
+from sqlalchemy.orm import relationship
 
 from app.db.database import Base
-from sqlalchemy import JSON, Column, DateTime, Float, Integer, String
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.sql import func
-
-
-class VideoStatus(enum.Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    GENERATING_SLIDES = "generating_slides"
-    GENERATING_IMAGES = "generating_images"
-    GENERATING_AUDIO = "generating_audio"
-    RENDERING = "rendering"
-    COMPLETED = "completed"
-    FAILED = "failed"
-
-
-class VisualStyle(enum.Enum):
-    CLASSIC = "classic"
-    WHITEBOARD = "whiteboard"
-    WATERCOLOR = "watercolor"
-    RETRO = "retro"
-    HERITAGE = "heritage"
-    PAPERCRAFT = "papercraft"
-    ANIME = "anime"
 
 
 class Video(Base):
+    """
+    Video database model.
+
+    Stores video metadata, generation parameters, and performance metrics.
+    """
+
     __tablename__ = "videos"
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # Primary Key
+    # ─────────────────────────────────────────────────────────────────────────
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    duration = Column(Integer, default=300)  # seconds
-    visual_style = Column(SQLEnum(VisualStyle), default=VisualStyle.CLASSIC)
-    status = Column(SQLEnum(VideoStatus), default=VideoStatus.PENDING)
+    """Video ID"""
 
-    # Configuration
-    config = Column(JSON)  # Stores slide count, narration speed, etc.
+    # ─────────────────────────────────────────────────────────────────────────
+    # Video Metadata
+    # ─────────────────────────────────────────────────────────────────────────
+    title = Column(String(255), nullable=False, index=True)
+    """Video title"""
 
-    # Generated assets
-    script_data = Column(JSON)  # Full slide structure
-    audio_file = Column(String, nullable=True)
-    video_file = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    """Video description"""
 
-    # Metadata
-    source_count = Column(Integer, default=0)
-    slide_count = Column(Integer, default=0)
-    word_count = Column(Integer, default=0)
-    generation_cost = Column(Float, default=0.0)
+    duration = Column(Integer, default=300)
+    """Video duration in seconds"""
 
-    # Progress tracking
-    progress_percentage = Column(Integer, default=0)
-    current_step = Column(String, nullable=True)
-    error_message = Column(String, nullable=True)
+    visual_style = Column(String(50), default="classic")
+    """Visual style (classic, whiteboard, watercolor, etc)"""
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # Status & Progress
+    # ─────────────────────────────────────────────────────────────────────────
+    status = Column(String(50), default="pending", index=True)
+    """Generation status: pending, processing, completed, failed"""
+
+    progress = Column(Integer, default=0)
+    """Progress percentage (0-100)"""
+
+    error_message = Column(Text, nullable=True)
+    """Error message if generation failed"""
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Output Files
+    # ─────────────────────────────────────────────────────────────────────────
+    output_path = Column(String(500), nullable=True)
+    """Path to generated video file"""
+
+    thumbnail_path = Column(String(500), nullable=True)
+    """Path to video thumbnail"""
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Metrics
+    # ─────────────────────────────────────────────────────────────────────────
+    generation_time = Column(Float, nullable=True)
+    """Time taken to generate video (seconds)"""
+
+    file_size = Column(Integer, nullable=True)
+    """Output file size in bytes"""
+
+    quality_score = Column(Float, default=0.0)
+    """Quality score (0-1)"""
+
+    # ─────────────────────────────────────────────────────────────────────────
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    # ─────────────────────────────────────────────────────────────────────────
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    """Creation timestamp"""
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        onupdate=func.now(),
+        nullable=False,
+    )
+    """Last update timestamp"""
+
     completed_at = Column(DateTime(timezone=True), nullable=True)
+    """Completion timestamp"""
+
+    def __repr__(self) -> str:
+        """String representation."""
+        return f"<Video(id={self.id}, title='{self.title}', status='{self.status}')>"

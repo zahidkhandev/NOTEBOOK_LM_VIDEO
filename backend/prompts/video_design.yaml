@@ -1,0 +1,166 @@
+# Video Design Prompts
+# Style-specific design configurations
+
+video_design:
+  whiteboard_style:
+    name: "Whiteboard Animation"
+    description: "Hand-drawn on whiteboard animation style"
+
+    system: |
+      You are a whiteboard animation designer.
+      Your task is to design clear, engaging whiteboard-style presentations.
+
+      Design Principles:
+      - Simple, clean drawings that are easy to follow
+      - Hand-drawn aesthetic (not overly polished)
+      - Progressive drawing of concepts
+      - Clear visual hierarchy
+      - Logical flow and organization
+      - Color used strategically for emphasis
+      - Text kept minimal but clear
+
+    specifications:
+      background:
+        type: "whiteboard"
+        color: "#FFFFFF"
+        texture: "subtle whiteboard texture"
+
+      drawing_style:
+        style: "hand-drawn"
+        line_width: 2
+        line_color: "#000000"
+        fill_opacity: 0.7
+
+      colors:
+        primary: "#000000"
+        accent: "#FF6B35"
+        secondary: "#004E89"
+        highlight: "#FDB833"
+
+      animation:
+        drawing_speed: "medium"
+        erase_style: "progressive"
+        hand_visibility: true
+        writing_effect: "realistic"
+
+      typography:
+        font: "Comic Sans MS, handwriting-like font"
+        size: 24
+        alignment: "centered"
+
+    design_template: |
+      Design a whiteboard animation slide:
+
+      Topic: {topic}
+      Key Points: {key_points}
+      Duration: {duration}
+
+      Return design specifications:
+      {{
+        "main_drawing": "Description of main visual",
+        "step_by_step": [
+          {{
+            "step": 1,
+            "action": "Draw...",
+            "timing": 2,
+            "explanation": "What this shows"
+          }}
+        ],
+        "text_additions": [
+          {{
+            "text": "Label or title",
+            "timing": 5,
+            "position": "Where written"
+          }}
+        ]
+      }}
+
+  classic_professional:
+    name: "Classic Professional"
+    description: "Professional polished presentation style"
+
+    specifications:
+      background:
+        type: "gradient|solid"
+        primary_color: "#F5F5F5"
+        secondary_color: "#FFFFFF"
+        texture: "subtle grain"
+
+      color_palette:
+        primary: "#0066CC"
+        secondary: "#FF6600"
+        accent: "#00CC99"
+        neutral: "#333333"
+        background: "#F5F5F5"
+
+      typography:
+        font_family: "Segoe UI, Helvetica, sans-serif"
+        heading_size: 36
+        body_size: 24
+        line_height: 1.6
+
+      design_elements:
+        logo_placement: "top-right corner"
+        branding: "consistent throughout"
+        spacing: "generous whitespace"
+        alignment: "grid-based"
+
+      animations:
+        style: "professional"
+        timing: "measured and purposeful"
+        transitions: "smooth fades and slides"
+
+  watercolor_artistic:
+    name: "Watercolor Artistic"
+    description: "Flowing, artistic watercolor presentation"
+
+    specifications:
+      background:
+        type: "watercolor"
+        base_color: "#FFF8F0"
+        wash_effect: true
+        organic_flow: true
+
+      color_palette:
+        primary: "#8B4513"
+        secondary: "#FF6B6B"
+        accent: "#FFA500"
+        highlight: "#FFD700"
+        background: "#FFF8F0"
+
+      artistic_elements:
+        technique: "watercolor wash"
+        blur_effect: 0.3
+        transparency: "layered"
+        organic_shapes: true
+
+      animations:
+        style: "flowing and organic"
+        speed: "graceful"
+        transitions: "watercolor dissolves"
+
+  anime_vibrant:
+    name: "Anime/Manga"
+    description: "Vibrant, dynamic anime-style presentation"
+
+    specifications:
+      background:
+        type: "gradient|illustration"
+        primary: "#FFFFFF"
+        secondary: "#F0F0F0"
+
+      color_palette:
+        primary: "#FF1493"
+        secondary: "#00CED1"
+        accent: "#FFD700"
+        highlight: "#32CD32"
+
+      character_design:
+        style: "anime/manga"
+        expressions: "expressive and engaging"
+        animation: "dynamic poses and gestures"
+
+      animations:
+        style: "fast and energetic"
+        effects: "pop, zoom, spin"
+        speed: "quick and snappy"

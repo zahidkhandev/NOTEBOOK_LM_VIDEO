@@ -1,0 +1,85 @@
+# Configuration and Settings
+# Global settings for prompt system
+
+version: "1.0"
+
+# Generation Settings
+generation:
+  default_duration: 300 # 5 minutes
+  min_duration: 60 # 1 minute
+  max_duration: 600 # 10 minutes
+
+  slides:
+    min_slides: 3
+    max_slides: 50
+    default_per_minute: 3 # Slides per minute
+    min_duration: 2 # Minimum seconds per slide
+    max_duration: 15 # Maximum seconds per slide
+
+  default_style: "classic"
+  supported_styles:
+    - classic
+    - whiteboard
+    - watercolor
+    - anime
+    - retro
+    - heritage
+    - papercraft
+
+# Complexity Levels
+complexity_levels:
+  beginner:
+    emoji: "🟢"
+    description: "Fundamental concepts"
+    score: 0.5
+
+  intermediate:
+    emoji: "🟡"
+    description: "Developed knowledge"
+    score: 0.7
+
+  advanced:
+    emoji: "🔴"
+    description: "Specialized expertise"
+    score: 0.9
+
+# Quality Thresholds
+quality:
+  minimum_accuracy: 0.75
+  minimum_clarity: 0.75
+  minimum_engagement: 0.65
+  minimum_overall: 0.70
+
+# Timing Configuration
+timing:
+  reading_speed_wpm: 150
+  listening_speed_multiplier: 1.2
+  processing_time: 2 # seconds for visual
+  pause_between_concepts: 1
+  reflection_pause: 1.5
+
+# Audience Levels
+audiences:
+  child:
+    age_range: "5-11"
+    complexity: "beginner"
+    pace: "slow"
+
+  teen:
+    age_range: "12-17"
+    complexity: "intermediate"
+    pace: "medium"
+
+  adult:
+    age_range: "18+"
+    complexity: "advanced"
+    pace: "fast"
+
+# Learning Domains (Bloom's Taxonomy)
+bloom_taxonomy:
+  remember: 1
+  understand: 2
+  apply: 3
+  analyze: 4
+  evaluate: 5
+  create: 6

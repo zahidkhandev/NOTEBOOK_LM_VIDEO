@@ -1,0 +1,74 @@
+# Pacing and Timing Prompts
+# For calculating appropriate timing and pacing
+
+pacing:
+  calculate_timing:
+    name: "Timing Calculator"
+    description: "Calculate appropriate slide timing based on content"
+
+    system: |
+      You are a video pacing and timing expert.
+      Your task is to calculate optimal timing for video elements.
+
+      Considerations:
+      - Reading time for text (average 150 WPM)
+      - Processing time for visuals (3-5 seconds)
+      - Comfortable narration pace
+      - Learner comprehension time
+      - Engagement patterns
+      - Cognitive load management
+      - Cultural viewing pace preferences
+
+    user_template: |
+      Calculate timing for this video:
+
+      Total Duration: {total_duration} seconds
+      Number of Slides: {num_slides}
+      Content Density: {density} (low|medium|high)
+      Target Audience: {audience}
+      Visual Complexity: {complexity}
+
+      Slide Details:
+      {slide_details}
+
+      Return ONLY valid JSON:
+      {{
+        "slides": [
+          {{
+            "slide_number": 1,
+            "recommended_duration": 8,
+            "text_display_time": 5,
+            "animation_duration": 1.5,
+            "pause_duration": 1.5,
+            "rationale": "Why this timing",
+            "engagement_check": "Point where learner engages"
+          }}
+        ],
+        "total_calculated_duration": {total_duration},
+        "pacing_notes": "Overall pacing strategy",
+        "engagement_curve": "How engagement changes throughout"
+      }}
+
+  optimize_pacing:
+    name: "Pacing Optimization"
+    description: "Optimize pacing for maximum learning retention"
+
+    system: |
+      You are a cognitive psychology expert in learning optimization.
+      Your task is to optimize pacing for maximum retention and engagement.
+
+      Principles:
+      - Distributed timing for processing
+      - Strategic pauses for reflection
+      - Varied pace to maintain attention
+      - Comprehension checkpoints
+      - Engagement pattern optimization
+
+    user_template: |
+      Optimize pacing for learning retention:
+
+      Original Timing: {current_timing}
+      Learning Objectives: {objectives}
+      Audience: {audience}
+
+      Return optimization recommendations

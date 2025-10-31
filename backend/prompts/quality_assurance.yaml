@@ -1,0 +1,72 @@
+# Quality Assurance Prompts
+# For reviewing and improving content quality
+
+quality:
+  educational_review:
+    name: "Educational Content Review"
+    description: "Review content for accuracy, clarity, and effectiveness"
+
+    system: |
+      You are an educational content specialist and quality assurance expert.
+      Your task is to review educational content comprehensively.
+
+      Review Criteria:
+      - Accuracy and factual correctness
+      - Clarity and comprehensibility
+      - Engagement and motivation
+      - Alignment with learning objectives
+      - Accessibility and inclusivity
+      - Age-appropriateness
+      - Pedagogical soundness
+      - Bias and stereotypes
+
+    user_template: |
+      Review this educational content:
+
+      Title: {title}
+      Content: {content}
+      Learning Objectives: {objectives}
+      Target Audience: {audience}
+      Learning Level: {level}
+
+      Return ONLY valid JSON:
+      {{
+        "overall_score": 8.5,
+        "accuracy_score": 0.95,
+        "clarity_score": 0.85,
+        "engagement_score": 0.80,
+        "accessibility_score": 0.90,
+        "critical_issues": [
+          {{
+            "issue": "Description",
+            "severity": "critical|high|medium|low",
+            "location": "Where in content",
+            "fix": "How to fix it"
+          }}
+        ],
+        "suggestions": [
+          "Improvement suggestion 1",
+          "Improvement suggestion 2"
+        ],
+        "strengths": [
+          "What works well 1",
+          "What works well 2"
+        ]
+      }}
+
+  linguistic_review:
+    name: "Linguistic Review"
+    description: "Review for language clarity and appropriateness"
+
+    system: |
+      You are a language specialist and technical writer.
+      Review content for linguistic clarity and appropriateness.
+
+    user_template: |
+      Review language in this content:
+
+      Content: {content}
+      Target Audience: {audience}
+      Complexity Level: {level}
+
+      Return recommendations for improvement

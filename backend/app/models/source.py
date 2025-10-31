@@ -1,42 +1,92 @@
-import enum
+"""
+Source document model for database storage.
+
+Represents uploaded source documents used for video generation.
+"""
+
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Text, DateTime, Float, func
 
 from app.db.database import Base
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-
-
-class SourceType(enum.Enum):
-    PDF = "pdf"
-    DOCX = "docx"
-    TXT = "txt"
-    URL = "url"
-    YOUTUBE = "youtube"
 
 
 class Source(Base):
+    """
+    Source document database model.
+
+    Stores uploaded documents with metadata and processing status.
+    """
+
     __tablename__ = "sources"
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # Primary Key
+    # ─────────────────────────────────────────────────────────────────────────
     id = Column(Integer, primary_key=True, index=True)
-    video_id = Column(Integer, ForeignKey("videos.id"), nullable=True)
+    """Source ID"""
 
-    title = Column(String, nullable=False)
-    source_type = Column(SQLEnum(SourceType), nullable=False)
-    file_path = Column(String, nullable=True)
-    url = Column(String, nullable=True)
+    # ─────────────────────────────────────────────────────────────────────────
+    # File Information
+    # ─────────────────────────────────────────────────────────────────────────
+    filename = Column(String(255), nullable=False)
+    """Original filename"""
 
-    # Extracted content
-    content = Column(Text)
-    word_count = Column(Integer, default=0)
+    file_type = Column(String(20), nullable=False)
+    """File type (pdf, docx, txt, url, youtube)"""
 
+    file_path = Column(String(500), nullable=True)
+    """Path to stored file"""
+
+    file_size = Column(Integer, nullable=True)
+    """File size in bytes"""
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Content
+    # ─────────────────────────────────────────────────────────────────────────
+    content = Column(Text, nullable=True)
+    """Extracted text content"""
+
+    summary = Column(Text, nullable=True)
+    """AI-generated summary"""
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Status & Processing
+    # ─────────────────────────────────────────────────────────────────────────
+    status = Column(String(50), default="pending", index=True)
+    """Processing status: pending, processing, ready, failed"""
+
+    error_message = Column(Text, nullable=True)
+    """Error message if processing failed"""
+
+    # ─────────────────────────────────────────────────────────────────────────
     # Metadata
-    file_size = Column(Integer, nullable=True)  # bytes
+    # ─────────────────────────────────────────────────────────────────────────
+    language = Column(String(10), default="en")
+    """Document language"""
+
     page_count = Column(Integer, nullable=True)
+    """Number of pages (for PDFs)"""
 
+    word_count = Column(Integer, nullable=True)
+    """Total word count"""
+
+    # ─────────────────────────────────────────────────────────────────────────
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    # ─────────────────────────────────────────────────────────────────────────
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    """Upload timestamp"""
 
-    # Relationships
-    video = relationship("Video", backref="sources")
+    updated_at = Column(
+        DateTime(timezone=True),
+        onupdate=func.now(),
+        nullable=False,
+    )
+    """Last update timestamp"""
+
+    def __repr__(self) -> str:
+        """String representation."""
+        return f"<Source(id={self.id}, filename='{self.filename}', status='{self.status}')>"

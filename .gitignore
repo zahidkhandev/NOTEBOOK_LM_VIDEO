@@ -1,4 +1,6 @@
+# ═══════════════════════════════════════════════════════════════════════════════
 # Python
+# ═══════════════════════════════════════════════════════════════════════════════
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,43 +9,179 @@ __pycache__/
 venv/
 ENV/
 env/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
 *.egg-info/
-
-# Data folder - backend
-backend/data
-
-# Node
-node_modules/
+*.egg
+MANIFEST
 dist/
-.next/
-out/
 build/
 
-# Environment
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Backend Data
+# ═══════════════════════════════════════════════════════════════════════════════
+backend/data/*
+backend/app/data/*
+storage/outputs/videos/*
+storage/outputs/frames/*
+storage/outputs/audio/*
+storage/outputs/thumbnails/*
+storage/cache/*
+storage/temp/*
+storage/logs/*
+!storage/.gitkeep
+!storage/outputs/.gitkeep
+!storage/cache/.gitkeep
+!storage/temp/.gitkeep
+!storage/logs/.gitkeep
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Frontend
+# ═══════════════════════════════════════════════════════════════════════════════
+frontend/node_modules/
+frontend/dist/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.env.local
+frontend/.vercel/
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Environment Variables (NEVER COMMIT)
+# ═══════════════════════════════════════════════════════════════════════════════
 .env
 .env.local
-*.local
+.env.*.local
+.env.production.local
+.env.development.local
 
-# Data
-data/sources/*
-data/generated/*
-data/temp/*
-!data/.gitkeep
 
-# IDEs
+# ═══════════════════════════════════════════════════════════════════════════════
+# IDE & Editor
+# ═══════════════════════════════════════════════════════════════════════════════
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
 .DS_Store
 Thumbs.db
+.AppleDouble
+.LSOverride
 
-# Logs
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Logs & Temporary Files
+# ═══════════════════════════════════════════════════════════════════════════════
 *.log
 logs/
+*.log.*
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
 
-# Database
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Database Files (NOT STORED - use Docker volumes)
+# ═══════════════════════════════════════════════════════════════════════════════
 *.db
+*.sqlite
 *.sqlite3
+*.dbm
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Backups (Keep in backups/ but not in repo)
+# ═══════════════════════════════════════════════════════════════════════════════
+backups/*.sql
+backups/*.sql.gz
+backups/*.tar.gz
+!backups/.gitkeep
+backup_log.txt
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Docker
+# ═══════════════════════════════════════════════════════════════════════════════
+.docker/
+docker-compose.override.yml
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OS Files
+# ═══════════════════════════════════════════════════════════════════════════════
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# System Files
+# ═══════════════════════════════════════════════════════════════════════════════
+*.exe
+*.dll
+*.so
+*.dylib
+.bin/
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# IDE Temporary Files
+# ═══════════════════════════════════════════════════════════════════════════════
+.vscode/settings.json
+.vscode/extensions.json
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/vcs.xml
+.idea/runConfigurations.xml
+.idea/*.iml
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# pip
+# ═══════════════════════════════════════════════════════════════════════════════
+requirements-lock.txt
+Pipfile.lock
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Celery
+# ═══════════════════════════════════════════════════════════════════════════════
+celerybeat-schedule
+celerybeat.pid
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Generated Files
+# ═══════════════════════════════════════════════════════════════════════════════
+*.pyc
+*.pyo
+*.pyd
+.env.bak
+.env.swp
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Keep These Folders (use .gitkeep)
+# ═══════════════════════════════════════════════════════════════════════════════
+# storage/outputs/videos/.gitkeep
+# storage/cache/.gitkeep
+# storage/logs/.gitkeep
+# backups/.gitkeep
