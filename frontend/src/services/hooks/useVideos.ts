@@ -5,7 +5,6 @@
 import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { videoAPI } from "../api";
-import { Video } from "../types";
 import { useToast } from "./useToast";
 
 export const useVideos = (
@@ -19,17 +18,15 @@ export const useVideos = (
   // Fetch videos list
   const videosQuery = useQuery(
     ["videos", skip, limit, statusFilter],
-    () => videoAPI.list(skip, limit, statusFilter),
+    () => {
+      const filters = statusFilter ? { statusFilter } : undefined;
+      return videoAPI.list(skip, limit, filters);
+    },
     {
       refetchInterval: 5000,
       staleTime: 2000,
     }
   );
-
-  // Fetch single video
-  const videoQuery = useQuery(["video"], () => null, {
-    enabled: false,
-  });
 
   const getVideo = useCallback(
     (videoId: number) => {
@@ -48,7 +45,8 @@ export const useVideos = (
         successToast("Video deleted successfully");
         queryClient.invalidateQueries("videos");
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
+        // ✅ TYPED ERROR
         errorToast(error.message || "Failed to delete video");
       },
     }
@@ -59,9 +57,10 @@ export const useVideos = (
     (videoId: number) => videoAPI.getDownloadUrl(videoId),
     {
       onSuccess: (data) => {
-        if (data.url) {
+        if (data.download_url) {
+          // ✅ CORRECT FIELD NAME
           const link = document.createElement("a");
-          link.href = data.url;
+          link.href = data.download_url;
           link.download = `video-${Date.now()}.mp4`;
           document.body.appendChild(link);
           link.click();
@@ -69,7 +68,8 @@ export const useVideos = (
           successToast("Download started");
         }
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
+        // ✅ TYPED ERROR
         errorToast(error.message || "Failed to download video");
       },
     }

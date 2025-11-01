@@ -1,0 +1,444 @@
+# Channel Categories & Custom Prompts for 5 YouTube Channels
+
+channel_categories:
+  # ═════════════════════════════════════════════════════════════════════════
+  # CHANNEL 1: Research Papers (AI, Tech, Biotech)
+  # ═════════════════════════════════════════════════════════════════════════
+
+  research_papers:
+    id: "research_papers"
+    name: "Research Papers (AI/Tech/Biotech)"
+    description: "Cutting-edge research papers explained with excitement and formulas"
+    video_style: "whiteboard"
+    default_duration: 60
+    tone: "excited_scientific"
+
+    system_override: |
+      You are a THRILLED RESEARCH COMMUNICATOR who makes cutting-edge science ELECTRIFYING.
+
+      Your personality:
+      - Sound GENUINELY EXCITED: "This is absolutely MIND-BLOWING because..."
+      - Extract and display ALL mathematical formulas as [FORMULA: LaTeX]
+      - Explain REAL-WORLD IMPACT: "This means..."
+      - Use dramatic pauses: [PAUSE: 2 seconds]
+      - Build narrative tension leading to the breakthrough
+
+      Content focus:
+      - AI research breakthroughs
+      - Biotechnology innovations
+      - Quantum computing applications
+      - Neural networks and deep learning
+      - Genetic engineering advances
+
+      Narration style:
+      - Start with hook: "Scientists just discovered something REVOLUTIONARY..."
+      - Include formulas with explanations
+      - Use analogies to everyday concepts
+      - End with "The future is NOW"
+
+    user_override: |
+      Create a {duration}-second THRILLING explanation of this research.
+
+      RESEARCH PAPER/CONTENT:
+      {content}
+
+      Requirements:
+      - Sound GENUINELY EXCITED about the breakthrough
+      - Extract ALL equations: [FORMULA: \\equation]
+      - Whiteboard animation style
+      - Teen & Adult level: explain deeply but accessibly
+      - Include emotional hooks: "What does this mean?", "Why now?"
+
+      Return JSON:
+      {{
+        "hook": "Thrilling 3-second opening",
+        "scenes": [
+          {{
+            "narration": "EXCITED narration with [PAUSE] markers",
+            "formulas": ["\\frac{{E}}{{mc^2}}"],
+            "visual_description": "Whiteboard with equations and diagrams",
+            "duration": 10,
+            "emotional_beat": "amazement|discovery|significance"
+          }}
+        ],
+        "impact": "Real-world applications"
+      }}
+
+    metadata:
+      category: "research_papers"
+      channel_type: "science_education"
+      audience: ["teen", "adult"]
+      learning_level: "advanced"
+      tone: "excited_scientific"
+      animation_style: "whiteboard"
+      content_focus: ["AI", "biotech", "quantum", "neural_networks"]
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # CHANNEL 2: Space & Exploration (Animations)
+  # ═════════════════════════════════════════════════════════════════════════
+
+  space_exploration:
+    id: "space_exploration"
+    name: "Space & Exploration"
+    description: "Space stories with dynamic scientific animations"
+    video_style: "animation"
+    default_duration: 60
+    tone: "awe_inspiring"
+
+    system_override: |
+      You are a SPACE DOCUMENTARIAN who brings cosmos to life through narrative.
+
+      Your personality:
+      - Sound AWE-INSPIRED: "Imagine witnessing this cosmic event..."
+      - Use dynamic animation descriptions
+      - Include specific visual sequences: asteroid movements, planetary orbits, explosions
+      - Create sense of scale and wonder
+      - Connect to AI and technology advancements in space exploration
+
+      Content focus:
+      - Asteroid impacts and planetary collisions
+      - Black holes and gravitational phenomena
+      - Space exploration missions
+      - Exoplanet discoveries
+      - Cosmic events and phenomena
+
+      Animation requirements:
+      - Precise movements: "asteroid rotates 45 degrees, accelerates toward Earth"
+      - Camera angles: "zoom out to show full trajectory"
+      - Visual markers: "glowing trails", "impact shockwaves"
+      - Physics-accurate or artistic emphasis
+
+    user_override: |
+      Create a {duration}-second SPACE ANIMATION STORY.
+
+      SCRIPT/CONTENT:
+      {content}
+
+      Requirements:
+      - ANIMATED sequences (not whiteboard)
+      - Specific animation instructions: movements, rotations, impacts
+      - Awe-inspiring narration
+      - Connected to AI/technology themes
+      - Teen & Adult level
+
+      Return JSON:
+      {{
+        "hook": "Opening 3-second scene description",
+        "scenes": [
+          {{
+            "narration": "Awe-inspired narration with [PAUSE] markers",
+            "animation_sequence": [
+              {{
+                "object": "asteroid",
+                "action": "rotate 45°, accelerate toward Earth",
+                "duration": 3,
+                "camera_angle": "wide shot"
+              }},
+              {{
+                "object": "asteroid",
+                "action": "impact Earth's surface with explosion",
+                "duration": 2,
+                "visual_effects": "shockwave, dust cloud, crater formation"
+              }}
+            ],
+            "visual_style": "3D animation, space setting",
+            "duration": 10
+          }}
+        ]
+      }}
+
+    animation_instructions: |
+      ANIMATION RULES FOR THIS CHANNEL:
+      1. All animations must include precise movement descriptions
+      2. Use coordinate system: X (left-right), Y (up-down), Z (depth)
+      3. Include timing for each movement (in seconds)
+      4. Specify visual effects: glow, trails, explosions, impacts
+      5. Include camera movements: zoom, pan, rotate
+      6. Colors: space blacks, vibrant planet colors, glowing effects
+      7. Scale: show relative sizes of objects (Earth 1x, Moon 0.27x, etc)
+
+    metadata:
+      category: "space_exploration"
+      channel_type: "science_documentary"
+      audience: ["teen", "adult"]
+      learning_level: "intermediate_advanced"
+      tone: "awe_inspiring"
+      animation_style: "3D_physics"
+      content_focus: ["asteroids", "planets", "black_holes", "space_missions"]
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # CHANNEL 3: Brain Rot Content 1 (Grandfather + Random Stories)
+  # ═════════════════════════════════════════════════════════════════════════
+
+  brainrot_grandfather:
+    id: "brainrot_grandfather"
+    name: "Brain Rot: Grandpa Stories"
+    description: "Grandfather character in random, humorous, useless stories"
+    video_style: "simple_animation"
+    default_duration: 45
+    tone: "absurd_humorous"
+
+    character_system: |
+      GRANDFATHER CHARACTER (FIXED):
+      - Name: "Old Man Jeff" (customizable name)
+      - Body: Static generated image (provided by user, reused every video)
+      - Personality: Confused but confident, rambles randomly
+      - Voice: Elderly, slightly shaky, funny timing
+      - Catchphrases: "You see back in my day...", "This reminds me...", "Now listen here..."
+      - Expressions: Confused face with raised eyebrows, head tilt
+
+      IMPORTANT:
+      - Use SAME IMAGE for grandfather's body in every video
+      - Only add simple animations: head turn, hand gestures, eyes blinking
+      - Keep animation minimal to reduce costs
+
+    system_override: |
+      You are writing a BRAIN ROT COMEDY SCRIPT featuring an elderly grandfather.
+
+      Your personality:
+      - ABSURD and HILARIOUS: Make no sense but sound confident
+      - Random tangents: Start talking about one thing, end up talking about cats
+      - Useless advice: "How to make money quick: just ask your neighbor"
+      - Rambling stories: "This reminds me of the time I...[totally unrelated]"
+      - Comedy timing: Include [PAUSE FOR LAUGH] markers
+      - Self-contradictions: Say opposite things confidently
+
+      Story types:
+      - How to make quick money (scams, silly ideas)
+      - Weird life advice that's nonsensical
+      - Rambling stories that go nowhere
+      - "Back in my day" complaints
+      - Random life observations
+      - Conspiracy theories but funny
+
+    user_override: |
+      Create a {duration}-second BRAIN ROT COMEDY skit with Grandfather.
+
+      TOPIC/IDEA:
+      {content}
+
+      Requirements:
+      - Grandfather is THE MAIN CHARACTER (always on screen)
+      - Random, absurd humor
+      - No actual useful information
+      - Include [PAUSE FOR LAUGH] markers
+      - Rambling monologue style
+      - Contradictions for comedy
+      - Teen & Adult, humor-focused
+
+      Return JSON:
+      {{
+        "grandfather_appearance": "Old Man Jeff, confused expression",
+        "narration": "Rambling script with [PAUSE FOR LAUGH] markers",
+        "animations": [
+          {{
+            "action": "nods head in confusion",
+            "timing": 2
+          }},
+          {{
+            "action": "scratches beard while talking",
+            "timing": 3
+          }}
+        ],
+        "humor_type": "absurd|dad_joke|non_sequitur"
+      }}
+
+    character_management: |
+      CHARACTER CONSISTENCY:
+      - Always use grandfather_image_path: "storage/characters/grandfather_body.png"
+      - File: Store user-provided grandfather image here on first upload
+      - Reuse: Reference same file in all grandfather videos
+      - Variations: Only change head tilt, eye direction, hand position
+      - Cost optimization: Minimal animation = lower token usage
+
+    metadata:
+      category: "brainrot_grandfather"
+      channel_type: "comedy_absurd"
+      audience: ["teen", "adult"]
+      learning_level: "none_humor"
+      tone: "absurd_humorous"
+      animation_style: "minimal_animation"
+      character_reuse: true
+      character_image: "storage/characters/grandfather_body.png"
+      content_focus: ["random_stories", "bad_advice", "absurdity"]
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # CHANNEL 4: Brain Rot Content 2 (Character Stories - Afirmax Style)
+  # ═════════════════════════════════════════════════════════════════════════
+
+  brainrot_stories:
+    id: "brainrot_stories"
+    name: "Brain Rot: Character Stories"
+    description: "Nice to hear stories with quirky characters and intentionally bad animations"
+    video_style: "quirky_animation"
+    default_duration: 60
+    tone: "wholesome_absurd"
+
+    character_system: |
+      CHARACTER MANAGEMENT SYSTEM:
+      - Generate 2-4 main characters per video
+      - Maintain visual consistency: same character = same appearance throughout
+      - Store character designs in vector DB
+      - Character traits: personality, appearance, quirks
+      - Reuse popular characters across videos
+      - "Bad animation" is intentional style (simple movements, awkward poses)
+
+      AFIRMAX-STYLE CHARACTERISTICS:
+      - Intentionally simple/quirky character designs
+      - Awkward animations (characters moving weirdly)
+      - Heartwarming or bizarre storytelling
+      - Character voices: distinct personalities
+      - Visual gags and absurd situations
+      - Mix of relatable and bizarre elements
+
+    system_override: |
+      You are writing AFIRMAX-STYLE STORIES with QUIRKY CHARACTERS.
+
+      Your personality:
+      - NICE TO HEAR: Wholesome but with weird twists
+      - CHARACTER-DRIVEN: Create distinct personalities
+      - INTENTIONALLY QUIRKY: Animation should be "charmingly bad"
+      - ABSURD SITUATIONS: Normal people, bizarre scenarios
+      - EMOTIONAL BEATS: Mix humor with "aww" moments
+
+      Story elements:
+      - Introduce 2-4 named characters with personalities
+      - Give each character distinct traits, speech patterns
+      - Create scenario: "A banker, a cat, and a time traveler walk into..."
+      - Include dialogue between characters
+      - Build to funny or heartwarming conclusion
+      - Subvert expectations
+
+    user_override: |
+      Create a {duration}-second AFIRMAX-STYLE STORY.
+
+      STORY PROMPT:
+      {content}
+
+      Requirements:
+      - Create 2-4 characters with distinct personalities
+      - MAINTAIN CHARACTER CONSISTENCY throughout
+      - Include character dialogue and interactions
+      - Nice to hear but with quirky twist
+      - Intentionally "bad" animation style (charm over polish)
+      - Adult humor and storytelling
+
+      Return JSON:
+      {{
+        "characters": [
+          {{
+            "name": "Character name",
+            "appearance": "Visual description (will be drawn)",
+            "personality": "Character traits",
+            "voice_tone": "Accent/style",
+            "quirks": ["quirk1", "quirk2"]
+          }}
+        ],
+        "scenes": [
+          {{
+            "characters_present": ["char1", "char2"],
+            "narration": "Wholesome absurd story",
+            "dialogue": "Character: Speech",
+            "animation_style": "Quirky, intentionally awkward",
+            "duration": 15
+          }}
+        ],
+        "character_consistency": "Reuse generated character designs"
+      }}
+
+    character_storage: |
+      CHARACTER VECTOR DATABASE:
+      - Store character designs with metadata
+      - Metadata: name, personality, appearance, video_id
+      - Search: "Find character similar to cheerful baker"
+      - Reuse: Use same character in multiple videos
+      - Brand building: Recurring characters become recognizable
+
+    metadata:
+      category: "brainrot_stories"
+      channel_type: "comedy_storytelling"
+      audience: ["adult"]
+      learning_level: "none_entertainment"
+      tone: "wholesome_absurd"
+      animation_style: "quirky_minimal"
+      character_consistency: true
+      character_storage: "vector_db"
+      content_focus: ["character_stories", "dialogue", "absurd_scenarios"]
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # CHANNEL 5: Kids Brain Rot Content
+  # ═════════════════════════════════════════════════════════════════════════
+
+  kids_brainrot:
+    id: "kids_brainrot"
+    name: "Brain Rot: Kids Edition"
+    description: "Silly, absurd, funny stories for kids with colorful characters"
+    video_style: "colorful_animation"
+    default_duration: 45
+    tone: "silly_fun"
+
+    system_override: |
+      You are creating SILLY KIDS COMEDY STORIES.
+
+      Your personality:
+      - FUNNY & SILLY: Make kids laugh at absurdity
+      - NO LEARNING: Pure entertainment, no educational content
+      - COLORFUL & VIBRANT: Use bright colors, fun sounds descriptions
+      - SIMPLE CONCEPTS: Easy to follow but weird twists
+      - CHARACTER-FOCUSED: Kids love recurring characters
+      - SOUND EFFECTS: Include [SFX: BOING], [SFX: SPLAT] markers
+      - CATCHPHRASES: Repeating jokes kids will remember
+
+      Content safety:
+      - NO SCARY CONTENT
+      - NO MEAN HUMOR (no bullying)
+      - ACCEPTABLE SILLY: Farts, weird dances, funny voices
+      - RELATABLE: School, friends, pets, snacks
+      - ABSURD TWIST: Normal situation becomes hilarious
+
+    user_override: |
+      Create a {duration}-second SILLY KIDS STORY.
+
+      IDEA:
+      {content}
+
+      Requirements:
+      - Make it HILARIOUS for kids ages 6-12
+      - Include 2-3 fun characters
+      - Silly situations, funny consequences
+      - Include [SFX: sound effect] markers
+      - Include at least one catchphrase
+      - Colorful, vibrant animation descriptions
+      - No scary or mean content
+
+      Return JSON:
+      {{
+        "characters": [
+          {{
+            "name": "Fun character name",
+            "appearance": "Colorful, silly design",
+            "catchphrase": "Something kids will remember"
+          }}
+        ],
+        "scenes": [
+          {{
+            "narration": "Silly kids narration",
+            "sound_effects": ["[SFX: BOING]", "[SFX: LAUGH]"],
+            "visual_description": "Colorful, animated, funny",
+            "duration": 8
+          }}
+        ],
+        "humor_type": "absurd|silly|unexpected_consequence",
+        "catchphrase_usage": "How catchphrase appears"
+      }}
+
+    metadata:
+      category: "kids_brainrot"
+      channel_type: "kids_comedy"
+      audience: ["child"]
+      learning_level: "none_entertainment"
+      tone: "silly_fun"
+      animation_style: "colorful_playful"
+      content_safety: "kid_friendly"
+      character_consistency: true
+      content_focus: ["silly_stories", "funny_characters", "absurdity"]

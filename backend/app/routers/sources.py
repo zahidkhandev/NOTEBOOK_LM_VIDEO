@@ -1,94 +1,92 @@
 """
-Source document management endpoints.
-
-Handles file uploads, extraction, storage, and management of source documents.
+Source document management endpoints - Tortoise ORM
+Handles file uploads, extraction, storage, and management.
 """
 
 import logging
 import os
 from typing import List, Optional
 
-from fastapi import APIRouter, UploadFile, File, HTTPException, status, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, UploadFile, File, HTTPException, status
+import pdfplumber
 
 from app.config import settings
-from app.core.constants import SourceStatus, ERROR_MESSAGES
-from app.db.database import get_db
-from app.models.source import Source
+from app.models.models import Source
 from app.utils.validators import validate_file_upload, sanitize_filename
 from app.services.embedding_service import get_embedding_service
 
 logger = logging.getLogger(__name__)
-
 router = APIRouter()
 
 
-class SourceSchema:
-    """Source response schema."""
-
-    def __init__(self, source: Source):
-        self.id = source.id
-        self.filename = source.filename
-        self.file_type = source.file_type
-        self.status = source.status
-        self.word_count = source.word_count
-        self.page_count = source.page_count
-        self.created_at = source.created_at.isoformat()
-        self.updated_at = source.updated_at.isoformat()
-
-    def dict(self):
-        return {
-            "id": self.id,
-            "filename": self.filename,
-            "file_type": self.file_type,
-            "status": self.status,
-            "word_count": self.word_count,
-            "page_count": self.page_count,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
-        }
+ERROR_MESSAGES = {
+    "invalid_file_type": "Invalid file type. Supported: PDF, DOCX, TXT",
+    "no_content": "No content could be extracted from file",
+}
 
 
-async def extract_content(file_path: str, file_type: str) -> tuple[str, int]:
-    """
-    Extract content from various file types.
-
-    Args:
-        file_path: Path to file
-        file_type: File type (pdf, docx, txt)
-
-    Returns:
-        Tuple of (content, word_count)
-    """
+async def extract_content(file_path: str, file_type: str) -> tuple:
+    """Extract content from various file types."""
     try:
         content = ""
         word_count = 0
 
         if file_type == "txt":
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read()
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+            except UnicodeDecodeError:
+                with open(file_path, "r", encoding="latin-1") as f:
+                    content = f.read()
 
         elif file_type == "pdf":
             try:
                 import PyPDF2
-
                 with open(file_path, "rb") as f:
                     pdf_reader = PyPDF2.PdfReader(f)
                     for page in pdf_reader.pages:
-                        content += page.extract_text()
-            except ImportError:
-                logger.warning("PyPDF2 not installed, skipping PDF extraction")
-                content = "[PDF content extraction not available]"
+                        text = page.extract_text()
+                        if text:
+                            text = text.replace('\x00', '').strip()
+                            content += text + "\n"
+
+                if not content or content.strip() == "":
+                    logger.warning("⚠️ PyPDF2: No text, trying pdfplumber...")
+                    try:
+                        with pdfplumber.open(file_path) as pdf:
+                            for page in pdf.pages:
+                                text = page.extract_text()
+                                if text:
+                                    text = text.replace('\x00', '').strip()
+                                    content += text + "\n"
+                    except Exception as e:
+                        logger.warning(f"pdfplumber failed: {e}")
+                        content = "[PDF content extraction not available]"
+
+            except Exception as pdf_error:
+                logger.warning(f"PyPDF2 failed: {pdf_error}, trying pdfplumber...")
+                try:
+                    with pdfplumber.open(file_path) as pdf:
+                        for page in pdf.pages:
+                            text = page.extract_text()
+                            if text:
+                                text = text.replace('\x00', '').strip()
+                                content += text + "\n"
+                except Exception as e:
+                    logger.error(f"❌ All PDF extraction failed: {e}")
+                    content = "[PDF content extraction not available]"
 
         elif file_type == "docx":
             try:
                 from docx import Document
-
                 doc = Document(file_path)
                 for para in doc.paragraphs:
                     content += para.text + "\n"
             except ImportError:
-                logger.warning("python-docx not installed, skipping DOCX extraction")
+                logger.warning("python-docx not installed")
+                content = "[DOCX content extraction not available]"
+            except Exception as e:
+                logger.error(f"DOCX extraction failed: {e}")
                 content = "[DOCX content extraction not available]"
 
         word_count = len(content.split())
@@ -100,44 +98,8 @@ async def extract_content(file_path: str, file_type: str) -> tuple[str, int]:
 
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
-async def upload_source(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-):
-    """
-    Upload a source document.
-
-    Accepts PDF, DOCX, TXT files for processing.
-
-    Args:
-        file: Source document file
-        db: Database session
-
-    Returns:
-        dict: Upload confirmation with source metadata
-
-    Raises:
-        HTTPException: If file validation fails
-
-    Example:
-        ```
-        POST /api/sources/upload
-        Content-Type: multipart/form-data
-
-        {
-            "file": <binary file data>
-        }
-
-        Response (201):
-        {
-            "id": 1,
-            "filename": "document.pdf",
-            "file_type": "pdf",
-            "status": "processing",
-            "message": "File uploaded successfully"
-        }
-        ```
-    """
+async def upload_source(file: UploadFile = File(...)):
+    """Upload a source document. Accepts PDF, DOCX, TXT files."""
     try:
         if not file.filename:
             raise HTTPException(
@@ -145,7 +107,6 @@ async def upload_source(
                 detail=ERROR_MESSAGES["invalid_file_type"],
             )
 
-        # Validate file
         file_content = await file.read()
         file_size = len(file_content)
         file_ext = file.filename.split(".")[-1].lower()
@@ -164,7 +125,6 @@ async def upload_source(
 
         logger.info(f"📁 Processing upload: {file.filename}")
 
-        # Save file
         safe_filename = sanitize_filename(file.filename)
         file_path = os.path.join(settings.UPLOAD_DIR, safe_filename)
 
@@ -175,28 +135,33 @@ async def upload_source(
         # Extract content
         content, word_count = await extract_content(file_path, file_ext)
 
-        if not content:
+        # ✅ SANITIZE CONTENT
+        if content:
+            content = ''.join(
+                char for char in content 
+                if ord(char) > 31 or char in '\n\r\t'
+            )
+            content = content.replace('\x00', '').replace('\ufffd', '').strip()
+            word_count = len(content.split())
+
+        if not content or len(content.strip()) == 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ERROR_MESSAGES["no_content"],
             )
 
-        # Create database record
-        source = Source(
+        # ✅ Create with Tortoise ORM
+        source = await Source.create(
             filename=file.filename,
             file_type=file_ext,
             file_path=file_path,
             file_size=file_size,
             content=content,
             word_count=word_count,
-            status=SourceStatus.READY.value,
+            status="ready",
         )
 
-        db.add(source)
-        db.commit()
-        db.refresh(source)
-
-        logger.info(f"✅ Source created: {source.id}")
+        logger.info(f"✅ Source created: {source.id} - {word_count} words")
 
         return {
             "id": source.id,
@@ -204,6 +169,7 @@ async def upload_source(
             "file_type": source.file_type,
             "status": source.status,
             "word_count": source.word_count,
+            "file_size": source.file_size,
             "message": "File uploaded successfully",
         }
 
@@ -218,49 +184,14 @@ async def upload_source(
 
 
 @router.get("/")
-async def list_sources(
-    skip: int = 0,
-    limit: int = 10,
-    db: Session = Depends(get_db),
-):
-    """
-    List all uploaded sources.
-
-    Args:
-        skip: Number of records to skip
-        limit: Number of records to return
-        db: Database session
-
-    Returns:
-        dict: List of source documents
-
-    Example:
-        ```
-        GET /api/sources/?skip=0&limit=10
-
-        Response:
-        {
-            "sources": [
-                {
-                    "id": 1,
-                    "filename": "document.pdf",
-                    "status": "ready",
-                    "word_count": 5000,
-                    "created_at": "2025-10-31T23:00:00Z"
-                }
-            ],
-            "total": 1,
-            "skip": 0,
-            "limit": 10
-        }
-        ```
-    """
+async def list_sources(skip: int = 0, limit: int = 100):
+    """List all uploaded sources."""
     try:
         logger.debug("Fetching sources list")
 
-        query = db.query(Source).offset(skip).limit(limit)
-        sources = query.all()
-        total = db.query(Source).count()
+        # ✅ Tortoise ORM
+        sources = await Source.all().offset(skip).limit(limit)
+        total = await Source.all().count()
 
         sources_list = [
             {
@@ -269,6 +200,9 @@ async def list_sources(
                 "file_type": s.file_type,
                 "status": s.status,
                 "word_count": s.word_count,
+                "file_size": s.file_size,
+                "language": s.language,
+                "page_count": s.page_count,
                 "created_at": s.created_at.isoformat(),
             }
             for s in sources
@@ -290,44 +224,13 @@ async def list_sources(
 
 
 @router.get("/{source_id}")
-async def get_source(
-    source_id: int,
-    db: Session = Depends(get_db),
-):
-    """
-    Get source document details.
-
-    Args:
-        source_id: Source ID
-        db: Database session
-
-    Returns:
-        dict: Source document metadata and content
-
-    Raises:
-        HTTPException: If source not found
-
-    Example:
-        ```
-        GET /api/sources/1
-
-        Response:
-        {
-            "id": 1,
-            "filename": "document.pdf",
-            "file_type": "pdf",
-            "status": "ready",
-            "file_size": 1024000,
-            "word_count": 5000,
-            "content_preview": "First 500 characters...",
-            "created_at": "2025-10-31T23:00:00Z"
-        }
-        ```
-    """
+async def get_source(source_id: int):
+    """Get source document details."""
     try:
         logger.debug(f"Fetching source: {source_id}")
 
-        source = db.query(Source).filter(Source.id == source_id).first()
+        # ✅ Tortoise ORM
+        source = await Source.get_or_none(id=source_id)
 
         if not source:
             raise HTTPException(
@@ -343,6 +246,8 @@ async def get_source(
             "file_size": source.file_size,
             "word_count": source.word_count,
             "page_count": source.page_count,
+            "language": source.language,
+            "summary": source.summary,
             "content_preview": (source.content[:500] + "...") if source.content else None,
             "created_at": source.created_at.isoformat(),
             "updated_at": source.updated_at.isoformat(),
@@ -359,34 +264,13 @@ async def get_source(
 
 
 @router.delete("/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_source(
-    source_id: int,
-    db: Session = Depends(get_db),
-):
-    """
-    Delete a source document.
-
-    Args:
-        source_id: Source ID
-        db: Database session
-
-    Returns:
-        None
-
-    Raises:
-        HTTPException: If deletion fails
-
-    Example:
-        ```
-        DELETE /api/sources/1
-
-        Response: 204 No Content
-        ```
-    """
+async def delete_source(source_id: int):
+    """Delete a source document."""
     try:
-        logger.info(f"🗑️  Deleting source: {source_id}")
+        logger.info(f"🗑️ Deleting source: {source_id}")
 
-        source = db.query(Source).filter(Source.id == source_id).first()
+        # ✅ Tortoise ORM
+        source = await Source.get_or_none(id=source_id)
 
         if not source:
             raise HTTPException(
@@ -400,8 +284,7 @@ async def delete_source(
             logger.debug(f"Deleted file: {source.file_path}")
 
         # Delete database record
-        db.delete(source)
-        db.commit()
+        await source.delete()
 
         logger.info(f"✅ Source deleted: {source_id}")
         return None
@@ -417,36 +300,13 @@ async def delete_source(
 
 
 @router.post("/{source_id}/generate-embeddings", status_code=status.HTTP_202_ACCEPTED)
-async def generate_embeddings(
-    source_id: int,
-    db: Session = Depends(get_db),
-):
-    """
-    Generate embeddings for source document.
-
-    Args:
-        source_id: Source ID
-        db: Database session
-
-    Returns:
-        dict: Job status
-
-    Example:
-        ```
-        POST /api/sources/1/generate-embeddings
-
-        Response (202):
-        {
-            "source_id": 1,
-            "status": "processing",
-            "message": "Embeddings generation started"
-        }
-        ```
-    """
+async def generate_embeddings(source_id: int):
+    """Generate embeddings for source document."""
     try:
         logger.info(f"📊 Generating embeddings for source: {source_id}")
 
-        source = db.query(Source).filter(Source.id == source_id).first()
+        # ✅ Tortoise ORM
+        source = await Source.get_or_none(id=source_id)
 
         if not source:
             raise HTTPException(
@@ -460,7 +320,7 @@ async def generate_embeddings(
                 detail="Source has no content",
             )
 
-        # Start embedding generation (would be in background in production)
+        # ✅ USE EMBEDDING SERVICE
         embedding_service = get_embedding_service()
         embedding = await embedding_service.embed_text(source.content)
 
@@ -468,6 +328,7 @@ async def generate_embeddings(
             "source_id": source_id,
             "status": "processing",
             "message": "Embeddings generation started",
+            "embedding_dimension": len(embedding),
         }
 
     except HTTPException:

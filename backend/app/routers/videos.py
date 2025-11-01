@@ -1,74 +1,42 @@
 """
-Video management and retrieval endpoints.
-
+Video management and retrieval endpoints - Tortoise ORM
 Handles video tracking, metadata, status, and deletion.
 """
 
 import logging
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, status, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
-from app.db.database import get_db
-from app.models.video import Video
-from app.core.constants import VideoStatus
+from app.models.models import Video
 from app.services.cache_service import get_cache_service
 
 logger = logging.getLogger(__name__)
-
 router = APIRouter()
 
 
 @router.get("/")
 async def list_videos(
     status_filter: Optional[str] = None,
+    channel_id: Optional[str] = None,
     skip: int = 0,
-    limit: int = 10,
-    db: Session = Depends(get_db),
+    limit: int = 20,
 ):
-    """
-    List all generated videos.
-
-    Args:
-        status_filter: Filter by status (pending|processing|completed|failed)
-        skip: Number of records to skip
-        limit: Number of records to return
-        db: Database session
-
-    Returns:
-        dict: List of videos with metadata
-
-    Example:
-        ```
-        GET /api/videos/?status_filter=completed&skip=0&limit=10
-
-        Response:
-        {
-            "videos": [
-                {
-                    "id": 1,
-                    "title": "My Video",
-                    "duration": 300,
-                    "status": "completed",
-                    "url": "/videos/video_1.mp4",
-                    "created_at": "2025-10-31T23:00:00Z"
-                }
-            ],
-            "total": 1
-        }
-        ```
-    """
+    """List all generated videos with optional filters."""
     try:
-        logger.debug(f"Fetching videos list: status={status_filter}")
+        logger.debug(f"Fetching videos: status={status_filter}, channel={channel_id}")
 
-        query = db.query(Video)
+        # ✅ Tortoise ORM
+        query = Video.all()
 
         if status_filter:
-            query = query.filter(Video.status == status_filter)
+            query = query.filter(status=status_filter)
 
-        total = query.count()
-        videos = query.offset(skip).limit(limit).all()
+        if channel_id:
+            query = query.filter(channel_id=channel_id)
+
+        total = await query.count()
+        videos = await query.offset(skip).limit(limit)
 
         videos_list = [
             {
@@ -76,9 +44,9 @@ async def list_videos(
                 "title": v.title,
                 "description": v.description,
                 "duration": v.duration,
+                "channel_id": v.channel_id,
                 "status": v.status,
                 "progress": v.progress,
-                "url": f"/videos/{v.id}" if v.output_path else None,
                 "quality_score": v.quality_score,
                 "created_at": v.created_at.isoformat(),
                 "completed_at": v.completed_at.isoformat() if v.completed_at else None,
@@ -102,49 +70,13 @@ async def list_videos(
 
 
 @router.get("/{video_id}")
-async def get_video(
-    video_id: int,
-    db: Session = Depends(get_db),
-):
-    """
-    Get video details and metadata.
-
-    Args:
-        video_id: Video ID
-        db: Database session
-
-    Returns:
-        dict: Video metadata and current status
-
-    Raises:
-        HTTPException: If video not found
-
-    Example:
-        ```
-        GET /api/videos/1
-
-        Response:
-        {
-            "id": 1,
-            "title": "My Video",
-            "description": "Video description",
-            "duration": 300,
-            "status": "completed",
-            "progress": 100,
-            "visual_style": "whiteboard",
-            "url": "/videos/1",
-            "file_size": 50000000,
-            "quality_score": 0.92,
-            "generation_time": 125.5,
-            "created_at": "2025-10-31T23:00:00Z",
-            "completed_at": "2025-10-31T23:02:05Z"
-        }
-        ```
-    """
+async def get_video(video_id: int):
+    """Get video details and metadata."""
     try:
         logger.debug(f"Fetching video: {video_id}")
 
-        video = db.query(Video).filter(Video.id == video_id).first()
+        # ✅ Tortoise ORM
+        video = await Video.get_or_none(id=video_id)
 
         if not video:
             raise HTTPException(
@@ -157,10 +89,9 @@ async def get_video(
             "title": video.title,
             "description": video.description,
             "duration": video.duration,
-            "visual_style": video.visual_style,
+            "channel_id": video.channel_id,
             "status": video.status,
             "progress": video.progress,
-            "url": f"/videos/{video.id}" if video.output_path else None,
             "file_size": video.file_size,
             "quality_score": video.quality_score,
             "generation_time": video.generation_time,
@@ -180,37 +111,13 @@ async def get_video(
 
 
 @router.get("/{video_id}/download")
-async def download_video(
-    video_id: int,
-    db: Session = Depends(get_db),
-):
-    """
-    Get video download URL.
-
-    Args:
-        video_id: Video ID
-        db: Database session
-
-    Returns:
-        dict: Download URL and metadata
-
-    Example:
-        ```
-        GET /api/videos/1/download
-
-        Response:
-        {
-            "download_url": "/videos/video_1.mp4",
-            "filename": "My_Video.mp4",
-            "file_size": 50000000,
-            "content_type": "video/mp4"
-        }
-        ```
-    """
+async def download_video(video_id: int):
+    """Get video download URL."""
     try:
         logger.debug(f"Getting download info for video: {video_id}")
 
-        video = db.query(Video).filter(Video.id == video_id).first()
+        # ✅ Tortoise ORM
+        video = await Video.get_or_none(id=video_id)
 
         if not video:
             raise HTTPException(
@@ -242,34 +149,13 @@ async def download_video(
 
 
 @router.delete("/{video_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_video(
-    video_id: int,
-    db: Session = Depends(get_db),
-):
-    """
-    Delete a generated video.
-
-    Args:
-        video_id: Video ID
-        db: Database session
-
-    Returns:
-        None
-
-    Raises:
-        HTTPException: If deletion fails
-
-    Example:
-        ```
-        DELETE /api/videos/1
-
-        Response: 204 No Content
-        ```
-    """
+async def delete_video(video_id: int):
+    """Delete a generated video."""
     try:
-        logger.info(f"🗑️  Deleting video: {video_id}")
+        logger.info(f"🗑️ Deleting video: {video_id}")
 
-        video = db.query(Video).filter(Video.id == video_id).first()
+        # ✅ Tortoise ORM
+        video = await Video.get_or_none(id=video_id)
 
         if not video:
             raise HTTPException(
@@ -277,13 +163,12 @@ async def delete_video(
                 detail="Video not found",
             )
 
-        # Invalidate cache
+        # ✅ Invalidate cache
         cache_service = get_cache_service()
         await cache_service.delete(f"video:{video_id}")
 
         # Delete from database
-        db.delete(video)
-        db.commit()
+        await video.delete()
 
         logger.info(f"✅ Video deleted: {video_id}")
         return None

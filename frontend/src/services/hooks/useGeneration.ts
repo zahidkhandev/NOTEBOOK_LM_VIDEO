@@ -37,12 +37,12 @@ export const useGeneration = () => {
         successToast("Video generation started");
         queryClient.invalidateQueries("videos");
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
+        // ✅ TYPED ERROR
         errorToast(error.message || "Failed to start generation");
       },
     }
   );
-
   // Fetch generation status
   const statusQuery = useQuery(
     ["generationStatus", generatedVideoId],
@@ -52,6 +52,7 @@ export const useGeneration = () => {
       refetchInterval: 2000,
       staleTime: 500,
       onSuccess: (data: GenerationStatus | null) => {
+        // ✅ TYPED
         if (
           data &&
           (data.status === "completed" ||
@@ -79,7 +80,8 @@ export const useGeneration = () => {
         successToast("Generation cancelled");
         queryClient.invalidateQueries("videos");
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
+        // ✅ TYPED ERROR
         errorToast(error.message || "Failed to cancel generation");
       },
     }

@@ -24,18 +24,19 @@ build/
 # ═══════════════════════════════════════════════════════════════════════════════
 backend/data/*
 backend/app/data/*
-storage/outputs/videos/*
-storage/outputs/frames/*
-storage/outputs/audio/*
-storage/outputs/thumbnails/*
-storage/cache/*
-storage/temp/*
-storage/logs/*
-!storage/.gitkeep
-!storage/outputs/.gitkeep
-!storage/cache/.gitkeep
-!storage/temp/.gitkeep
-!storage/logs/.gitkeep
+backend/storage/*
+backend/storage/outputs/videos/*
+backend/storage/outputs/frames/*
+backend/storage/outputs/audio/*
+backend/storage/outputs/thumbnails/*
+backend/storage/cache/*
+backend/storage/temp/*
+backend/storage/logs/*
+!backend/storage/.gitkeep
+!backend/storage/outputs/.gitkeep
+!backend/storage/cache/.gitkeep
+!backend/storage/temp/.gitkeep
+!backend/storage/logs/.gitkeep
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

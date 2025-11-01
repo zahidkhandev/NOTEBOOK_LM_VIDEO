@@ -1,202 +1,188 @@
 """
 Configuration management for NotebookLM Video Generator.
-
 Handles environment variables, defaults, and settings validation.
-Uses Pydantic for type safety and validation.
+5-CHANNEL SUPPORT + RATE LIMITING + TIMEOUTS
+Reads .env from PROJECT ROOT
 """
 
 import logging
 from typing import List
-
 from pydantic_settings import BaseSettings
+import sys
+from pathlib import Path
+
+# Add root to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from app.core.constants import RateLimits, Timeouts
 
 logger = logging.getLogger(__name__)
+
+# ✅ Calculate path to root .env
+# From: backend/app/config.py
+# Go up: config.py (app) -> app (backend) -> backend (root)
+ROOT_DIR = Path(__file__).parent.parent.parent
+ENV_FILE_PATH = ROOT_DIR / ".env"
+
+logger.info(f"📍 Looking for .env at: {ENV_FILE_PATH}")
 
 
 class Settings(BaseSettings):
     """Application configuration with environment variable support."""
 
-    # ═══════════════════════════════════════════════════════════════════════════
-    # API Keys (with secure defaults for development)
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
+    # API Keys
+    # ═════════════════════════════════════════════════════════════════════════
     GEMINI_API_KEY: str = "test-key-dev"
-    """Google Gemini API key for content generation"""
-
     GOOGLE_CLOUD_PROJECT_ID: str = "test-project-dev"
-    """Google Cloud Project ID for API services"""
-
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
-    """Path to Google Cloud credentials JSON file"""
 
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     # Application Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     APP_NAME: str = "NotebookLM Video Generator"
-    """Application display name"""
-
     DEBUG: bool = True
-    """Enable debug mode"""
-
     ENVIRONMENT: str = "development"
-    """Application environment: development, staging, production"""
 
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     # CORS Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     CORS_ORIGINS: List[str] = [
         "http://localhost:5173",
         "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
     ]
-    """Allowed origins for CORS requests"""
 
-    # ═══════════════════════════════════════════════════════════════════════════
-    # File Storage Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
+    # File Storage Configuration (LOCAL ONLY - NO CLOUD)
+    # ═════════════════════════════════════════════════════════════════════════
     UPLOAD_DIR: str = "storage/sources"
-    """Directory for uploaded source files"""
-
     GENERATED_DIR: str = "storage/outputs"
-    """Directory for generated video outputs"""
-
     CACHE_DIR: str = "storage/cache"
-    """Directory for cache files"""
-
     TEMP_DIR: str = "storage/temp"
-    """Directory for temporary files"""
-
+    CHARACTER_DIR: str = "storage/characters"
     MAX_UPLOAD_SIZE: int = 100 * 1024 * 1024
-    """Maximum upload file size in bytes (100 MB)"""
 
-    # ═══════════════════════════════════════════════════════════════════════════
-    # Database Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
-    DATABASE_URL: str = "postgresql://postgres:123@localhost:5434/notebook_lm_db"
-    """PostgreSQL connection URL"""
+    # ═════════════════════════════════════════════════════════════════════════
+    # Database Configuration (Tortoise ORM)
+    # ═════════════════════════════════════════════════════════════════════════
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5434
+    DB_USER: str = "postgres"
+    DB_PASSWORD: str = "123"
+    DB_NAME: str = "notebook_lm_db"
 
-    DATABASE_ECHO: bool = False
-    """Enable SQL query logging"""
-
-    DATABASE_POOL_SIZE: int = 20
-    """Database connection pool size"""
-
-    DATABASE_POOL_RECYCLE: int = 3600
-    """Database connection recycle time (seconds)"""
-
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     # Redis Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     REDIS_URL: str = "redis://:yourpassword@localhost:6379/0"
-    """Redis connection URL"""
-
     REDIS_DB_NUMBER: int = 0
-    """Redis database number"""
-
+    REDIS_SOCKET_TIMEOUT: int = 5
+    REDIS_SOCKET_CONNECT_TIMEOUT: int = 5
     CACHE_TTL: int = 3600
-    """Cache TTL in seconds"""
 
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     # Embeddings Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     EMBEDDING_MODEL: str = "text-embedding-004"
-    """Model used for text embeddings"""
-
     EMBEDDING_DIMENSION: int = 768
-    """Dimension of embedding vectors"""
-
     SIMILARITY_THRESHOLD: float = 0.7
-    """Threshold for semantic similarity matching"""
-
     MAX_SEARCH_RESULTS: int = 5
-    """Maximum search results to return"""
-
     SEARCH_CACHE_TTL: int = 3600
-    """Cache TTL for search results (seconds)"""
 
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     # Learning System Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
     ENABLE_SEMANTIC_LEARNING: bool = True
-    """Enable semantic learning from generated videos"""
-
     ENABLE_PATTERN_REUSE: bool = True
-    """Enable pattern reuse for similar content"""
-
     MIN_CONFIDENCE_FOR_REUSE: float = 0.75
-    """Minimum confidence score for pattern reuse"""
-
     AUTO_CONCEPT_EXTRACTION: bool = True
-    """Automatically extract concepts from content"""
 
-    # ═══════════════════════════════════════════════════════════════════════════
-    # AWS/LocalStack Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
-    LOCALSTACK_ENDPOINT: str = "http://localhost:4566"
-    """LocalStack endpoint for S3/DynamoDB"""
+    # ═════════════════════════════════════════════════════════════════════════
+    # 5-CHANNEL CONFIGURATION
+    # ═════════════════════════════════════════════════════════════════════════
+    ACTIVE_CHANNELS: List[str] = [
+        "research_papers",
+        "space_exploration",
+        "brainrot_grandfather",
+        "brainrot_stories",
+        "kids_brainrot",
+    ]
+    CHANNEL_PROMPTS_DIR: str = "backend/prompts"
 
-    AWS_REGION: str = "ap-south-1"
-    """AWS region"""
-
-    AWS_ACCESS_KEY_ID: str = "test"
-    """AWS access key"""
-
-    AWS_SECRET_ACCESS_KEY: str = "test"
-    """AWS secret key"""
-
-    S3_BUCKET_VIDEOS: str = "notebook-lm-videos-dev"
-    """S3 bucket for video storage"""
-
-    S3_BUCKET_EMBEDDINGS: str = "notebook-lm-embeddings-dev"
-    """S3 bucket for embedding storage"""
-
-    # ═══════════════════════════════════════════════════════════════════════════
-    # Gemini Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
+    # Gemini AI Configuration + RATE LIMITING
+    # ═════════════════════════════════════════════════════════════════════════
     GEMINI_API_MODEL: str = "gemini-2.0-flash"
-    """Gemini model version"""
-
     GEMINI_TEMPERATURE: float = 0.7
-    """Temperature for Gemini generation (0-1)"""
-
     GEMINI_MAX_TOKENS: int = 2048
-    """Maximum tokens for Gemini output"""
+    GEMINI_RPM_LIMIT: int = RateLimits.RPM_LIMIT
+    GEMINI_REQUEST_INTERVAL: float = RateLimits.REQUEST_INTERVAL
+    GEMINI_DAILY_TOKEN_LIMIT: int = RateLimits.DAILY_TOKEN_LIMIT
+    GEMINI_DAILY_REQUEST_LIMIT: int = RateLimits.DAILY_REQUEST_LIMIT
+    GEMINI_TPM_LIMIT: int = RateLimits.TPM_LIMIT
 
-    # ═══════════════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════════════════
+    # TIMEOUTS - Strict enforcement
+    # ═════════════════════════════════════════════════════════════════════════
+    API_REQUEST_TIMEOUT: int = Timeouts.GEMINI_REQUEST
+    API_POLL_TIMEOUT: int = Timeouts.VIDEO_GENERATION_MAX
+    POLLING_INTERVAL: int = Timeouts.POLLING_INTERVAL
+    POLLING_MAX_ATTEMPTS: int = Timeouts.POLLING_MAX_ATTEMPTS
+    UPLOAD_TIMEOUT: int = Timeouts.UPLOAD
+
+    # ═════════════════════════════════════════════════════════════════════════
     # Video Generation Configuration
-    # ═══════════════════════════════════════════════════════════════════════════
-    DEFAULT_DURATION: int = 300
-    """Default video duration in seconds"""
-
-    VIDEO_OUTPUT_DURATION_SHORTS: int = 120
-    """Short-form video duration in seconds"""
-
+    # ═════════════════════════════════════════════════════════════════════════
+    DEFAULT_DURATION: int = 60
+    MIN_VIDEO_DURATION: int = 30
+    MAX_VIDEO_DURATION: int = 600
+    VIDEO_OUTPUT_DURATION_SHORTS: int = 45
     VIDEO_OUTPUT_DURATION_LONG: int = 300
-    """Long-form video duration in seconds"""
-
     DEFAULT_STYLE: str = "whiteboard"
-    """Default video style"""
-
     MAX_SLIDES: int = 50
-    """Maximum slides per video"""
-
     MAX_PARALLEL_GENERATIONS: int = 2
-    """Maximum parallel video generations"""
-
     VIDEO_FPS: int = 30
-    """Video frames per second"""
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # AWS/LocalStack Configuration (DISABLED FOR LOCAL STORAGE)
+    # ═════════════════════════════════════════════════════════════════════════
+    USE_LOCAL_STORAGE: bool = True
+    LOCALSTACK_ENDPOINT: str = "http://localhost:4566"
+    AWS_REGION: str = "ap-south-1"
+    AWS_ACCESS_KEY_ID: str = "test"
+    AWS_SECRET_ACCESS_KEY: str = "test"
+    S3_BUCKET_VIDEOS: str = "notebook-lm-videos-dev"
+    S3_BUCKET_EMBEDDINGS: str = "notebook-lm-embeddings-dev"
+
 
     class Config:
-        """Pydantic configuration."""
-
-        env_file = ".env"
+        # ✅ POINT TO ROOT .env
+        env_file = str(ENV_FILE_PATH)
+        env_file_encoding = "utf-8"
         case_sensitive = True
 
 
-# ═════════════════════════════════════════════════════════════════════════════
-# Initialize settings
-# ═════════════════════════════════════════════════════════════════════════════
 try:
     settings = Settings()
-    logger.info(f"✅ Configuration loaded: {settings.ENVIRONMENT}")
+    
+    logger.info("=" * 80)
+    logger.info("✅ Configuration loaded successfully!")
+    logger.info("=" * 80)
+    logger.info(f"🔑 GEMINI_API_KEY: {settings.GEMINI_API_KEY[:20]}...")
+    logger.info(f"📌 Environment: {settings.ENVIRONMENT}")
+    logger.info(f"🔐 Gemini Rate Limits: {settings.GEMINI_RPM_LIMIT} RPM")
+    logger.info(
+        f"⏱️  API Timeouts: {settings.API_REQUEST_TIMEOUT}s (requests), "
+        f"{settings.API_POLL_TIMEOUT}s (generation)"
+    )
+    logger.info(
+        f"📁 Storage: {settings.GENERATED_DIR} + {settings.CHARACTER_DIR} (LOCAL ONLY)"
+    )
+    logger.info(f"📊 Channels: {', '.join(settings.ACTIVE_CHANNELS)}")
+    logger.info("=" * 80)
+    
 except Exception as e:
     logger.error(f"❌ Failed to load configuration: {e}")
     raise

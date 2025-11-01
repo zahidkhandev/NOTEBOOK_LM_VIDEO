@@ -43,7 +43,7 @@ export const useUpload = () => {
           });
         }, 2000);
       },
-      onError: (error: any, file) => {
+      onError: (error: Error, file) => {
         setUploadProgress((prev) => ({
           ...prev,
           [file.name]: { filename: file.name, progress: 0, status: "failed" },
@@ -66,7 +66,8 @@ export const useUpload = () => {
       onSuccess: () => {
         queryClient.invalidateQueries("sources");
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
+        // ✅ TYPED ERROR
         errorToast(error.message || "Failed to delete source");
       },
     }
@@ -98,7 +99,7 @@ export const useUpload = () => {
     upload,
     isUploading: uploadMutation.isLoading,
     uploadProgress: Object.values(uploadProgress),
-    sources: sourcesQuery.data?.sources || [],
+    sources: sourcesQuery.data || [], // ✅ ALREADY Source[], NOT .sources
     isLoadingSources: sourcesQuery.isLoading,
     deleteSource: deleteSourceMutation.mutate,
     isDeletingSource: deleteSourceMutation.isLoading,

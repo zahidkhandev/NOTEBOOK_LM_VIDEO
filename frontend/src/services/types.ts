@@ -1,5 +1,6 @@
 /**
  * TypeScript types for NotebookLM Video Generator frontend
+ * UPDATED FOR 5-CHANNEL SUPPORT
  */
 
 export interface Source {
@@ -20,7 +21,8 @@ export interface Video {
   duration: number;
   status: "pending" | "processing" | "completed" | "failed" | "cancelled";
   progress: number;
-  visual_style: "classic" | "whiteboard" | "watercolor" | "anime";
+  visual_style?: "classic" | "whiteboard" | "watercolor" | "anime";
+  channel_id?: string;
   url?: string;
   quality_score?: number;
   created_at: string;
@@ -33,14 +35,21 @@ export interface GenerationRequest {
   title: string;
   description?: string;
   duration: number;
-  visual_style: "classic" | "whiteboard" | "watercolor" | "anime";
   source_ids: number[];
+
+  // 5-CHANNEL SUPPORT
+  channel_id: string; // NEW: research_papers|space_exploration|brainrot_grandfather|brainrot_stories|kids_brainrot
+  custom_prompt?: string; // NEW: custom prompt overlay
+
+  // OPTIONAL (for backwards compatibility)
+  visual_style?: "classic" | "whiteboard" | "watercolor" | "anime";
   target_audience?: "child" | "teen" | "adult";
   learning_objectives?: string[];
 }
 
 export interface GenerationResponse {
   video_id: number;
+  channel_id: string;
   status: string;
   progress: number;
   job_id?: string;
@@ -49,6 +58,7 @@ export interface GenerationResponse {
 
 export interface GenerationStatus {
   video_id: number;
+  channel_id?: string;
   status: "pending" | "processing" | "completed" | "failed" | "cancelled";
   progress: number;
   error?: string;
@@ -81,4 +91,14 @@ export interface UploadProgress {
   filename: string;
   progress: number;
   status: "uploading" | "completed" | "failed";
+}
+
+// NEW: Channel info type
+export interface Channel {
+  id: string;
+  label: string;
+  description: string;
+  icon: string;
+  duration: number;
+  hasCharacterUpload?: boolean;
 }

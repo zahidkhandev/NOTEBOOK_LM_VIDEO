@@ -6,9 +6,11 @@ Centralized definitions for magic numbers, strings, and enums.
 
 from enum import Enum
 
+
 # ═════════════════════════════════════════════════════════════════════════════
 # File Types
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class FileType(str, Enum):
     """Supported file types."""
@@ -28,9 +30,11 @@ SUPPORTED_EXTENSIONS = {
     "txt": ["text/plain"],
 }
 
+
 # ═════════════════════════════════════════════════════════════════════════════
 # Video Status
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class VideoStatus(str, Enum):
     """Video generation status values."""
@@ -46,6 +50,7 @@ class VideoStatus(str, Enum):
 # Source Status
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class SourceStatus(str, Enum):
     """Source document status values."""
 
@@ -58,6 +63,7 @@ class SourceStatus(str, Enum):
 # ═════════════════════════════════════════════════════════════════════════════
 # Video Styles
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class VideoStyle(str, Enum):
     """Available video styles."""
@@ -75,6 +81,7 @@ class VideoStyle(str, Enum):
 # Content Complexity Levels
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class ComplexityLevel(str, Enum):
     """Content complexity levels."""
 
@@ -86,6 +93,7 @@ class ComplexityLevel(str, Enum):
 # ═════════════════════════════════════════════════════════════════════════════
 # Concept Categories
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class ConceptCategory(str, Enum):
     """Concept classification categories."""
@@ -103,6 +111,7 @@ class ConceptCategory(str, Enum):
 # Error Messages
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 ERROR_MESSAGES = {
     "invalid_file_type": "Unsupported file type. Supported types: PDF, DOCX, TXT",
     "file_too_large": "File exceeds maximum size limit (100 MB)",
@@ -112,9 +121,11 @@ ERROR_MESSAGES = {
     "no_sources": "At least one source document is required",
 }
 
+
 # ═════════════════════════════════════════════════════════════════════════════
 # Cache Keys
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 CACHE_KEYS = {
     "search": "search:{query}:{top_k}",
@@ -124,9 +135,11 @@ CACHE_KEYS = {
     "video_status": "video_status:{video_id}",
 }
 
+
 # ═════════════════════════════════════════════════════════════════════════════
 # Quality Thresholds
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 QUALITY_THRESHOLDS = {
     "minimum_accuracy": 0.75,
@@ -136,21 +149,51 @@ QUALITY_THRESHOLDS = {
     "concept_confidence_minimum": 0.5,
 }
 
+
 # ═════════════════════════════════════════════════════════════════════════════
 # Timing Constants
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 TIMING = {
     "reading_speed_wpm": 150,  # Words per minute
-    "min_slide_duration": 2,   # Seconds
+    "min_slide_duration": 2,  # Seconds
     "max_slide_duration": 15,  # Seconds
     "animation_duration": 1.5,  # Seconds
-    "pause_duration": 0.5,     # Seconds
+    "pause_duration": 0.5,  # Seconds
 }
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Rate Limiting & Timeouts (GEMINI FREE TIER)
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class RateLimits:
+    """Gemini free tier rate limits."""
+
+    RPM_LIMIT: int = 15  # Requests per minute
+    REQUEST_INTERVAL: float = 4.0  # Seconds (60/15 = 4)
+    DAILY_TOKEN_LIMIT: int = 1_000_000  # 1M tokens/day
+    DAILY_REQUEST_LIMIT: int = 1_500  # 1500 requests/day
+    TPM_LIMIT: int = 250_000  # Tokens per minute
+
+
+class Timeouts:
+    """API and service timeouts (in seconds)."""
+
+    GEMINI_REQUEST: int = 30  # Gemini API call timeout
+    VIDEO_GENERATION_MAX: int = 3600  # 1 hour max for video
+    API_REQUEST: int = 60  # General API requests
+    UPLOAD: int = 300  # File upload timeout
+    POLLING_INTERVAL: int = 2  # Status check interval
+    POLLING_MAX_ATTEMPTS: int = 300  # 10 minutes max (300 * 2s)
+
 
 # ═════════════════════════════════════════════════════════════════════════════
 # API Response Messages
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 SUCCESS_MESSAGES = {
     "upload_complete": "File uploaded successfully",

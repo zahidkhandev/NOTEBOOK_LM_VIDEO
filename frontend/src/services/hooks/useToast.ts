@@ -8,6 +8,12 @@ import { ToastMessage } from "../types";
 export const useToast = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
+  // MOVE THIS FIRST ✅
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  // THEN THIS ✅
   const addToast = useCallback(
     (
       message: string,
@@ -27,12 +33,8 @@ export const useToast = () => {
 
       return id;
     },
-    []
+    [removeToast]
   );
-
-  const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
 
   const success = useCallback(
     (message: string, duration?: number) => {

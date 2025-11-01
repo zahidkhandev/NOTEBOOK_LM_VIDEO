@@ -1,192 +1,156 @@
 """
-Video generation service for creating educational videos.
-
-Orchestrates the complete video generation workflow.
+Video generation service - Tortoise ORM with UTC timezone support
+PRODUCTION GRADE - Complete service for video generation workflow
 """
 
 import logging
-from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 
-from app.config import settings
-from app.services.embedding_service import get_embedding_service
-from app.services.concept_extraction_service import get_concept_extraction_service
-from app.services.knowledge_graph_service import get_knowledge_graph_service
+from app.models.models import Video
+from app.core.constants import VideoStatus
 
 logger = logging.getLogger(__name__)
 
 
 class VideoGenerationService:
-    """Service for orchestrating video generation."""
-
-    def __init__(self):
-        """Initialize video generation service."""
-        self.embedding_service = get_embedding_service()
-        self.concept_service = get_concept_extraction_service()
-        self.graph_service = get_knowledge_graph_service()
-        logger.info("✅ Video generation service initialized")
-
-    async def generate_video(
-        self,
-        title: str,
-        sources: List[dict],
-        duration: int = 300,
-        style: str = "classic",
-    ) -> dict:
+    """Handle video generation workflow and progress tracking."""
+    
+    async def update_video_progress(self, video_id: int, progress: int, status: str = None) -> Video:
         """
-        Generate video from sources.
-
+        Update video generation progress.
+        
         Args:
-            title: Video title
-            sources: List of source documents
-            duration: Video duration in seconds
-            style: Visual style
-
+            video_id: Video ID
+            progress: Progress percentage (0-100)
+            status: Optional status update
+        
         Returns:
-            Video generation job details
-
-        Example:
-            ```
-            service = VideoGenerationService()
-            job = await service.generate_video(
-                title="AI Basics",
-                sources=[...],
-                duration=300,
-                style="whiteboard"
-            )
-            ```
+            Updated video object
         """
         try:
-            logger.info(f"🎬 Starting video generation: {title}")
-
-            # Step 1: Extract content from sources
-            combined_content = await self._combine_sources(sources)
-            if not combined_content:
-                raise ValueError("No content extracted from sources")
-
-            # Step 2: Extract concepts
-            concepts = await self.concept_service.extract_concepts(combined_content)
-            if not concepts:
-                logger.warning("⚠️  No concepts extracted")
-                concepts = []
-
-            # Step 3: Build knowledge graph
-            graph = await self.graph_service.build_concept_graph(concepts)
-
-            # Step 4: Generate structure
-            structure = await self._generate_video_structure(
-                combined_content,
-                concepts,
-                duration,
-            )
-
-            # Step 5: Create embeddings for semantic learning
-            embeddings = await self._generate_embeddings(structure)
-
-            logger.info(f"✅ Video generation job created: {title}")
-
-            return {
-                "job_id": f"job_{datetime.now().timestamp()}",
-                "title": title,
-                "status": "pending",
-                "progress": 0,
-                "concepts": concepts,
-                "structure": structure,
-                "embeddings": embeddings,
-            }
-
+            video = await Video.get_or_none(id=video_id)
+            if not video:
+                logger.warning(f"⚠️ Video {video_id} not found for progress update")
+                return None
+            
+            video.progress = max(0, min(100, progress))  # Clamp 0-100
+            if status:
+                video.status = status
+                logger.debug(f"📊 Video {video_id} status → {status}")
+            
+            await video.save()
+            logger.debug(f"✅ Video {video_id} progress: {video.progress}%")
+            return video
+        
         except Exception as e:
-            logger.error(f"❌ Video generation failed: {e}")
-            return {
-                "error": str(e),
-                "status": "failed",
-            }
-
-    async def _combine_sources(self, sources: List[dict]) -> str:
-        """Combine content from multiple sources."""
+            logger.error(f"❌ Failed to update video progress: {e}", exc_info=True)
+            raise
+    
+    async def mark_processing(self, video_id: int) -> Video:
+        """
+        Mark video as processing.
+        
+        Args:
+            video_id: Video ID
+        
+        Returns:
+            Updated video object
+        """
         try:
-            content_parts = []
-            for source in sources:
-                if source.get("content"):
-                    content_parts.append(source["content"])
-
-            combined = "\n\n".join(content_parts)
-            logger.debug(f"✅ Combined {len(sources)} sources")
-            return combined
-
+            video = await Video.get_or_none(id=video_id)
+            if not video:
+                raise ValueError(f"Video {video_id} not found")
+            
+            video.status = VideoStatus.PROCESSING.value
+            video.progress = 10
+            await video.save()
+            
+            logger.info(f"✅ Video {video_id} marked as processing")
+            return video
         except Exception as e:
-            logger.error(f"❌ Source combination failed: {e}")
-            return ""
-
-    async def _generate_video_structure(
+            logger.error(f"❌ Failed to mark processing: {e}", exc_info=True)
+            raise
+    
+    async def mark_completed(
         self,
-        content: str,
-        concepts: List[dict],
-        duration: int,
-    ) -> dict:
-        """Generate video slide structure."""
+        video_id: int,
+        output_path: str,
+        file_size: int,
+        generation_time: float = None,
+        quality_score: float = 0.9
+    ) -> Video:
+        """
+        Mark video as completed.
+        
+        Args:
+            video_id: Video ID
+            output_path: Path to generated video file
+            file_size: File size in bytes
+            generation_time: Time taken to generate (seconds)
+            quality_score: Quality score (0-1)
+        
+        Returns:
+            Updated video object
+        """
         try:
-            logger.debug("Generating video structure")
-
-            # Calculate slides based on duration
-            num_slides = max(3, duration // 60)
-
-            structure = {
-                "title": "Video Structure",
-                "slides": [],
-                "total_slides": num_slides,
-                "estimated_duration": duration,
-            }
-
-            # Create slide structure
-            for i in range(num_slides):
-                slide = {
-                    "slide_number": i + 1,
-                    "title": f"Slide {i + 1}",
-                    "concepts": [c for c in concepts[i::num_slides]][:3],
-                    "duration": duration // num_slides,
-                }
-                structure["slides"].append(slide)
-
-            logger.info(f"✅ Generated {num_slides} slides")
-            return structure
-
+            video = await Video.get_or_none(id=video_id)
+            if not video:
+                raise ValueError(f"Video {video_id} not found")
+            
+            video.status = VideoStatus.COMPLETED.value
+            video.progress = 100
+            video.output_path = output_path
+            video.file_size = file_size
+            video.generation_time = generation_time
+            video.quality_score = quality_score
+            video.completed_at = datetime.now(timezone.utc)
+            
+            await video.save()
+            
+            logger.info(f"✅ Video {video_id} completed!")
+            logger.info(f"   📁 Output: {output_path}")
+            logger.info(f"   💾 Size: {file_size} bytes")
+            logger.info(f"   ⏱️ Time: {generation_time:.1f}s")
+            logger.info(f"   ⭐ Quality: {quality_score}/1.0")
+            
+            return video
+        
         except Exception as e:
-            logger.error(f"❌ Structure generation failed: {e}")
-            return {}
-
-    async def _generate_embeddings(self, structure: dict) -> List[List[float]]:
-        """Generate embeddings for semantic learning."""
+            logger.error(f"❌ Failed to mark completed: {e}", exc_info=True)
+            raise
+    
+    async def mark_failed(self, video_id: int, error_message: str) -> Video:
+        """
+        Mark video as failed.
+        
+        Args:
+            video_id: Video ID
+            error_message: Error description
+        
+        Returns:
+            Updated video object
+        """
         try:
-            logger.debug("Generating semantic embeddings")
-
-            embeddings = []
-            for slide in structure.get("slides", []):
-                text = f"{slide['title']} {slide.get('description', '')}"
-                embedding = await self.embedding_service.embed_text(text)
-                if embedding:
-                    embeddings.append(embedding)
-
-            logger.info(f"✅ Generated {len(embeddings)} embeddings")
-            return embeddings
-
+            video = await Video.get_or_none(id=video_id)
+            if not video:
+                logger.warning(f"⚠️ Video {video_id} not found for error marking")
+                return None
+            
+            video.status = VideoStatus.FAILED.value
+            video.error_message = error_message
+            
+            await video.save()
+            
+            logger.error(f"❌ Video {video_id} marked as FAILED")
+            logger.error(f"   Error: {error_message}")
+            
+            return video
+        
         except Exception as e:
-            logger.error(f"❌ Embedding generation failed: {e}")
-            return []
-
-
-# Singleton instance
-_generation_service: Optional[VideoGenerationService] = None
+            logger.error(f"❌ Failed to mark failed: {e}", exc_info=True)
+            raise
 
 
 def get_video_generation_service() -> VideoGenerationService:
-    """
-    Get or create video generation service singleton.
-
-    Returns:
-        VideoGenerationService instance
-    """
-    global _generation_service
-    if _generation_service is None:
-        _generation_service = VideoGenerationService()
-    return _generation_service
+    """Get video generation service instance (singleton-like)."""
+    return VideoGenerationService()
